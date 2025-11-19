@@ -35,10 +35,10 @@ admin.initializeApp({
 const db = admin.firestore();
 console.log('Firebase Admin SDK initialized');
 
-// --- OpenAI Setup ---
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_MASTER_KEY
-});
+// --- OpenAI Setup (Optional) ---
+const openai = process.env.OPENAI_MASTER_KEY
+    ? new OpenAI({ apiKey: process.env.OPENAI_MASTER_KEY })
+    : null;
 
 // --- In-Memory Rate Limiting ---
 const rateLimits = new Map();
