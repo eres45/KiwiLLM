@@ -580,32 +580,41 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                 try {
                     const response = await fetch(config.url, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            // Add Origin header to prevent some CORS issues if applicable, though this is server-to-server
-                            'Origin': 'https://kiwillm.web.app'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             model: config.modelId,
-                            messages: messages,
-                            stream: false
+                            messages: messages
                         })
                     });
 
+                    // Check if response is OK
                     if (!response.ok) {
                         const errorText = await response.text();
-                        console.error(`DeepInfra API Error (${response.status}):`, errorText);
-                        throw new Error(`Provider API error: ${response.status} ${errorText}`);
+                        console.error(`DeepInfra API error for ${model}:`, response.status, errorText);
+                        return res.status(response.status).json({
+                            error: {
+                                message: `DeepInfra API returned ${response.status}: ${errorText}`,
+                                type: 'api_error',
+                                code: response.status
+                            }
+                        });
                     }
 
                     const data = await response.json();
 
-                    // Extract content from OpenAI-compatible response
+                    // Validate response structure
                     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                        console.error('Invalid DeepInfra response format:', data);
-                        throw new Error('Invalid response format from provider');
+                        console.error(`Invalid DeepInfra response for ${model}:`, JSON.stringify(data));
+                        return res.status(500).json({
+                            error: {
+                                message: 'DeepInfra API returned invalid response structure',
+                                type: 'api_error',
+                                code: 'invalid_response'
+                            }
+                        });
                     }
 
+                    // Extract content from OpenAI-compatible response
                     const content = data.choices[0].message.content;
                     const promptTokens = data.usage?.prompt_tokens || estimateTokens(messages.map(m => m.content).join(''));
                     const completionTokens = data.usage?.completion_tokens || estimateTokens(content);
@@ -631,8 +640,14 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                         }
                     });
                 } catch (error) {
-                    console.error('DeepInfra Request Failed:', error);
-                    throw error; // Re-throw to be caught by outer try-catch
+                    console.error(`Error calling DeepInfra API for ${model}:`, error);
+                    return res.status(500).json({
+                        error: {
+                            message: `Failed to call DeepInfra API: ${error.message}`,
+                            type: 'api_error',
+                            code: 'fetch_error'
+                        }
+                    });
                 }
             }
 
