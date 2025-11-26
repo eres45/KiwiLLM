@@ -458,10 +458,83 @@ const Models = () => {
             tags: ['SOTA', 'Open Source'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
-        }
+        },
+        // Additional Google & Anthropic Models
+        { id: 'google/gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B', provider: 'Google', desc: 'Compact Gemini model for efficient processing.', context: '1m', tags: ['Fast'], icon: <Zap size={24} />, tier: 'Free Tier' },
+        { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash 001', provider: 'Google', desc: 'Latest Gemini Flash variant.', context: '1m', tags: ['Fast'], icon: <Zap size={24} />, tier: 'Free Tier' },
+        { id: 'google/gemma-3-27b-it', name: 'Gemma 3 27B', provider: 'Google', desc: 'Open Gemma model.', context: '128k', tags: ['Open Source'], icon: <Sparkles size={24} />, tier: 'Pro Tier' },
+        { id: 'google/gemma-2-27b-it', name: 'Gemma 2 27B', provider: 'Google', desc: 'Gemma 2 series model.', context: '128k', tags: ['Open Source'], icon: <Sparkles size={24} />, tier: 'Pro Tier' },
+        { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B', provider: 'Google', desc: 'Lightweight Gemma model.', context: '128k', tags: ['Efficient'], icon: <Sparkles size={24} />, tier: 'Free Tier' },
+        { id: 'google/gemma-3-10b-it', name: 'Gemma 3 10B', provider: 'Google', desc: 'Balanced Gemma 3 model.', context: '128k', tags: ['Efficient'], icon: <Sparkles size={24} />, tier: 'Free Tier' },
+        { id: 'google/gemma-3-10b-it-2506', name: 'Gemma 3 10B 2506', provider: 'Google', desc: 'Latest Gemma 3 variant.', context: '128k', tags: ['Efficient'], icon: <Sparkles size={24} />, tier: 'Free Tier' },
+        { id: 'anthropic/claude-3-7-sonnet-latest', name: 'Claude 3.7 Sonnet', provider: 'Anthropic', desc: 'Latest Claude 3.7 model.', context: '200k', tags: ['SOTA'], icon: <Sparkles size={24} />, tier: 'Pro Tier' },
+        { id: 'anthropic/claude-4-opus', name: 'Claude 4 Opus', provider: 'Anthropic', desc: 'Most capable Claude 4 model.', context: '200k', tags: ['SOTA'], icon: <Sparkles size={24} />, tier: 'Pro Tier' },
+        // More DeepSeek & Qwen Models
+        { id: 'deepseek-ai/DeepSeek-V3', name: 'DeepSeek V3', provider: 'DeepSeek', desc: 'Previous generation DeepSeek.', context: '128k', tags: ['Chat'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/DeepSeek-R1-Turbo', name: 'DeepSeek R1 Turbo', provider: 'DeepSeek', desc: 'Faster R1 variant.', context: '128k', tags: ['Reasoning', 'Fast'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/DeepSeek-R1-Distill-Llama-70B', name: 'DeepSeek R1 Distill', provider: 'DeepSeek', desc: 'Distilled R1 model.', context: '128k', tags: ['Reasoning'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/DeepSeek-V3.2-Exp', name: 'DeepSeek V3.2 Exp', provider: 'DeepSeek', desc: 'Experimental V3.2 model.', context: '128k', tags: ['Experimental'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/Janus-Pro-7B', name: 'Janus Pro 7B', provider: 'DeepSeek', desc: 'Vision-language model.', context: '128k', tags: ['Vision'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/DeepSeek-R1-0528', name: 'DeepSeek R1 0528', provider: 'DeepSeek', desc: 'R1 snapshot version.', context: '128k', tags: ['Reasoning'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/DeepSeek-R1-0528-Turbo', name: 'DeepSeek R1 0528 Turbo', provider: 'DeepSeek', desc: 'Faster R1 0528.', context: '128k', tags: ['Reasoning', 'Fast'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/DeepSeek-V3-0324', name: 'DeepSeek V3 0324', provider: 'DeepSeek', desc: 'V3 snapshot.', context: '128k', tags: ['Chat'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/DeepSeek-V3.1-Terminus', name: 'DeepSeek V3.1 Terminus', provider: 'DeepSeek', desc: 'Advanced V3.1 variant.', context: '128k', tags: ['SOTA'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'deepseek-ai/Janus-Pro-1B', name: 'Janus Pro 1B', provider: 'DeepSeek', desc: 'Compact vision model.', context: '128k', tags: ['Vision', 'Efficient'], icon: <Image size={24} />, tier: 'Free Tier' },
+        { id: 'Qwen/Qwen3-14B', name: 'Qwen3 14B', provider: 'Qwen', desc: 'Qwen3 14B model.', context: '128k', tags: ['Chat'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-32B', name: 'Qwen3 32B', provider: 'Qwen', desc: 'Qwen3 32B model.', context: '128k', tags: ['Chat'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-72B', name: 'Qwen3 72B', provider: 'Qwen', desc: 'Qwen3 72B model.', context: '128k', tags: ['Chat'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-72B-Thinking', name: 'Qwen3 72B Thinking', provider: 'Qwen', desc: 'Reasoning-focused Qwen3 72B.', context: '128k', tags: ['Reasoning'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-Coder-72B', name: 'Qwen3 Coder 72B', provider: 'Qwen', desc: 'Coding-focused Qwen3 72B.', context: '128k', tags: ['Coding'], icon: <Code size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-110B', name: 'Qwen3 110B', provider: 'Qwen', desc: 'Large Qwen3 model.', context: '128k', tags: ['Chat', 'SOTA'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-110B-Thinking', name: 'Qwen3 110B Thinking', provider: 'Qwen', desc: 'Reasoning Qwen3 110B.', context: '128k', tags: ['Reasoning', 'SOTA'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-Coder-110B', name: 'Qwen3 Coder 110B', provider: 'Qwen', desc: 'Advanced coding model.', context: '128k', tags: ['Coding', 'SOTA'], icon: <Code size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-170B', name: 'Qwen3 170B', provider: 'Qwen', desc: 'Largest Qwen3 base model.', context: '128k', tags: ['Chat', 'SOTA'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-170B-Thinking', name: 'Qwen3 170B Thinking', provider: 'Qwen', desc: 'Reasoning Qwen3 170B.', context: '128k', tags: ['Reasoning', 'SOTA'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-VL-235B-A22B-Instruct', name: 'Qwen3 VL 235B', provider: 'Qwen', desc: 'Vision-language Qwen model.', context: '128k', tags: ['Vision', 'SOTA'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-Next-80B-A3B-Instruct', name: 'Qwen3 Next 80B', provider: 'Qwen', desc: 'Next-gen Qwen model.', context: '128k', tags: ['Chat'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-235B-A22B-Instruct-2507', name: 'Qwen3 235B Instruct', provider: 'Qwen', desc: 'Instruction-tuned 235B.', context: '128k', tags: ['SOTA'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        // Meta Llama Models
+        { id: 'meta-llama/Llama-3.2-11B-Vision-Instruct', name: 'Llama 3.2 11B Vision', provider: 'Meta', desc: 'Vision-capable Llama.', context: '128k', tags: ['Vision'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'meta-llama/Llama-3.2-3B-Instruct', name: 'Llama 3.2 3B', provider: 'Meta', desc: 'Compact Llama 3.2.', context: '128k', tags: ['Efficient'], icon: <Box size={24} />, tier: 'Free Tier' },
+        { id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', name: 'Llama 3.3 70B Turbo', provider: 'Meta', desc: 'Fast Llama 3.3.', context: '128k', tags: ['Fast'], icon: <Box size={24} />, tier: 'Pro Tier' },
+        { id: 'meta-llama/Meta-Llama-3.1-8B-Instruct', name: 'Llama 3.1 8B', provider: 'Meta', desc: 'Efficient Llama 3.1.', context: '128k', tags: ['Efficient'], icon: <Box size={24} />, tier: 'Free Tier' },
+        { id: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo', name: 'Llama 3.1 8B Turbo', provider: 'Meta', desc: 'Fast Llama 3.1 8B.', context: '128k', tags: ['Fast'], icon: <Box size={24} />, tier: 'Free Tier' },
+        { id: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', name: 'Llama 3.1 70B Turbo', provider: 'Meta', desc: 'Fast Llama 3.1 70B.', context: '128k', tags: ['Fast'], icon: <Box size={24} />, tier: 'Pro Tier' },
+        { id: 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8', name: 'Llama 4 Maverick 17B', provider: 'Meta', desc: 'Llama 4 experimental.', context: '128k', tags: ['Experimental'], icon: <Box size={24} />, tier: 'Pro Tier' },
+        { id: 'meta-llama/Llama-4-Scout-17B-16E-Instruct', name: 'Llama 4 Scout 17B', provider: 'Meta', desc: 'Llama 4 Scout variant.', context: '128k', tags: ['Experimental'], icon: <Box size={24} />, tier: 'Pro Tier' },
+        { id: 'meta-llama/Llama-Guard-4-12B', name: 'Llama Guard 4 12B', provider: 'Meta', desc: 'Safety-focused Llama.', context: '128k', tags: ['Safety'], icon: <Box size={24} />, tier: 'Pro Tier' },
+        { id: 'meta-llama/Meta-Llama-3-8B-Instruct', name: 'Llama 3 8B', provider: 'Meta', desc: 'Llama 3 base 8B.', context: '128k', tags: ['Efficient'], icon: <Box size={24} />, tier: 'Free Tier' },
+        // Mistral Models
+        { id: 'mistralai/Mistral-Nemo-Instruct-2407', name: 'Mistral Nemo', provider: 'Mistral', desc: 'Mistral Nemo model.', context: '128k', tags: ['Efficient'], icon: <Sparkles size={24} />, tier: 'Pro Tier' },
+        { id: 'mistralai/Mistral-Small-24B-Instruct-2501', name: 'Mistral Small 24B', provider: 'Mistral', desc: 'Mistral Small model.', context: '128k', tags: ['Efficient'], icon: <Sparkles size={24} />, tier: 'Pro Tier' },
+        { id: 'mistralai/Mixtral-8x7B-Instruct-v0.1', name: 'Mixtral 8x7B', provider: 'Mistral', desc: 'MoE Mixtral model.', context: '32k', tags: ['MoE'], icon: <Sparkles size={24} />, tier: 'Pro Tier' },
+        // Nvidia & NousResearch Models
+        { id: 'nvidia/NVIDIA-Nemotron-Nano-12B-v2-VL', name: 'Nemotron Nano 12B VL', provider: 'Nvidia', desc: 'Vision Nemotron.', context: '128k', tags: ['Vision'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'nvidia/NVIDIA-Nemotron-Nano-9B-v2', name: 'Nemotron Nano 9B', provider: 'Nvidia', desc: 'Compact Nemotron.', context: '128k', tags: ['Efficient'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'nvidia/Llama-3.3-Nemotron-Super-49B-v1.5', name: 'Nemotron Super 49B', provider: 'Nvidia', desc: 'Enhanced Nemotron.', context: '128k', tags: ['Enhanced'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'NousResearch/Hermes-3-Llama-3.1-70B', name: 'Hermes 3 70B', provider: 'NousResearch', desc: 'Hermes 3 70B model.', context: '128k', tags: ['Open Source'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        // Other Providers
+        { id: 'moonshotai/Kimi-K2-Instruct-0905', name: 'Kimi K2 Instruct', provider: 'Moonshot', desc: 'Kimi K2 model.', context: '128k', tags: ['Chat'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'moonshotai/Kimi-K2-Thinking', name: 'Kimi K2 Thinking', provider: 'Moonshot', desc: 'Reasoning Kimi K2.', context: '128k', tags: ['Reasoning'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'microsoft/WizardLM-2-8x22B', name: 'WizardLM 2 8x22B', provider: 'Microsoft', desc: 'WizardLM MoE model.', context: '128k', tags: ['MoE'], icon: <Sparkles size={24} />, tier: 'Pro Tier' },
+        { id: 'microsoft/phi-4', name: 'Phi-4', provider: 'Microsoft', desc: 'Microsoft Phi-4.', context: '128k', tags: ['Efficient'], icon: <Sparkles size={24} />, tier: 'Free Tier' },
+        { id: 'Gryphe/MythoMax-L2-13b', name: 'MythoMax L2 13B', provider: 'Gryphe', desc: 'Creative writing model.', context: '4k', tags: ['Creative'], icon: <MessageSquare size={24} />, tier: 'Free Tier' },
+        { id: 'Sao10K/L3-8B-Lunaris-v1-Turbo', name: 'Lunaris 8B Turbo', provider: 'Sao10K', desc: 'Lunaris variant.', context: '8k', tags: ['Creative'], icon: <MessageSquare size={24} />, tier: 'Free Tier' },
+        { id: 'Sao10K/L3.1-70B-Euryale-v2.2', name: 'Euryale 70B v2.2', provider: 'Sao10K', desc: 'Euryale variant.', context: '8k', tags: ['Creative'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'Sao10K/L3.3-70B-Euryale-v2.3', name: 'Euryale 70B v2.3', provider: 'Sao10K', desc: 'Latest Euryale.', context: '8k', tags: ['Creative'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'zai-org/GLM-4.6', name: 'GLM 4.6', provider: 'ZhipuAI', desc: 'GLM-4 model.', context: '128k', tags: ['Chat'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'MiniMaxAI/MiniMax-M2', name: 'MiniMax M2', provider: 'MiniMaxAI', desc: 'MiniMax model.', context: '128k', tags: ['Chat'], icon: <MessageSquare size={24} />, tier: 'Pro Tier' },
+        { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B', provider: 'OpenAI-OSS', desc: 'Open GPT 120B.', context: '32k', tags: ['Open Source'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'openai/gpt-oss-120b-Turbo', name: 'GPT-OSS 120B Turbo', provider: 'OpenAI-OSS', desc: 'Fast GPT-OSS.', context: '32k', tags: ['Fast'], icon: <Cpu size={24} />, tier: 'Pro Tier' },
+        { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B', provider: 'OpenAI-OSS', desc: 'GPT-OSS 20B.', context: '32k', tags: ['Efficient'], icon: <Cpu size={24} />, tier: 'Free Tier' },
+        // OCR/Vision Models
+        { id: 'deepseek-ai/DeepSeek-OCR', name: 'DeepSeek OCR', provider: 'DeepSeek', desc: 'OCR specialized model.', context: '128k', tags: ['OCR', 'Vision'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'PaddlePaddle/PaddleOCR-VL-0.9B', name: 'PaddleOCR VL', provider: 'PaddlePaddle', desc: 'PaddleOCR vision model.', context: '8k', tags: ['OCR'], icon: <Image size={24} />, tier: 'Free Tier' },
+        { id: 'allenai/olmOCR-2-7B-1025', name: 'olmOCR 2 7B', provider: 'AllenAI', desc: 'AllenAI OCR model.', context: '128k', tags: ['OCR'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'ByteDance/Seedream-4', name: 'Seedream 4', provider: 'ByteDance', desc: 'Video generation model.', context: '8k', tags: ['Video'], icon: <Image size={24} />, tier: 'Pro Tier' }
     ];
 
-    const providers = ['All Providers', 'DeepSeek', 'xAI', 'Qwen', 'GPT-OSS', 'Anthropic', 'OpenAI', 'Google', 'Meta', 'Mistral', 'Nvidia', 'NousResearch'];
+    const providers = ['All Providers', 'DeepSeek', 'xAI', 'Qwen', 'GPT-OSS', 'Anthropic', 'OpenAI', 'Google', 'Meta', 'Mistral', 'Nvidia', 'NousResearch', 'Moonshot', 'Microsoft', 'Gryphe', 'Sao10K', 'ZhipuAI', 'MiniMaxAI', 'OpenAI-OSS', 'PaddlePaddle', 'AllenAI', 'ByteDance'];
 
     // Fetch uptime data from Firestore
     useEffect(() => {
