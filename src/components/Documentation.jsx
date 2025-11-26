@@ -283,6 +283,11 @@ Authorization: Bearer kiwi-your-api-key-here`;
                                 <span className="model-tag">Future</span>
                             </div>
                             <div className="model-card-docs">
+                                <h4>gemini-2.5-pro</h4>
+                                <p>Google's latest SOTA model</p>
+                                <span className="model-tag">New</span>
+                            </div>
+                            <div className="model-card-docs">
                                 <h4>o3</h4>
                                 <p>Advanced reasoning model</p>
                                 <span className="model-tag">Reasoning</span>

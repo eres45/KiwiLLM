@@ -326,6 +326,37 @@ const Models = () => {
             tags: ['Legacy'],
             icon: <Box size={24} />,
             tier: 'Pro Tier'
+        },
+        // Google Gemini Series
+        {
+            id: 'gemini-2.5-pro',
+            name: 'gemini-2.5-pro',
+            provider: 'Google',
+            desc: 'Latest Gemini 2.5 Pro model for complex tasks.',
+            context: '2m',
+            tags: ['New', 'SOTA'],
+            icon: <Sparkles size={24} />,
+            tier: 'Pro Tier'
+        },
+        {
+            id: 'gemini-2.5-deep-search',
+            name: 'gemini-2.5-deep-search',
+            provider: 'Google',
+            desc: 'Specialized Gemini model for deep research and search.',
+            context: '128k',
+            tags: ['Research', 'Search'],
+            icon: <Sparkles size={24} />,
+            tier: 'Pro Tier'
+        },
+        {
+            id: 'gemini-2.5-flash',
+            name: 'gemini-2.5-flash',
+            provider: 'Google',
+            desc: 'High-speed, cost-effective Gemini model.',
+            context: '1m',
+            tags: ['Fast', 'Efficient'],
+            icon: <Zap size={24} />,
+            tier: 'Free Tier'
         }
     ];
 

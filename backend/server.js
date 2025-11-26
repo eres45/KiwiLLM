@@ -138,7 +138,11 @@ const CUSTOM_MODELS = {
     'o4-mini': { url: 'https://sii3.top/api/openai.php', param: 'o4-mini' },
     'gpt-5': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5' },
     'gpt-5-mini': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5-mini' },
-    'gpt-5-nano': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5-nano' }
+    'gpt-5-nano': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5-nano' },
+    // Gemini Series
+    'gemini-2.5-pro': { url: 'https://sii3.top/api/gemini-dark.php', param: 'gemini-pro' },
+    'gemini-2.5-deep-search': { url: 'https://sii3.top/api/gemini-dark.php', param: 'gemini-deep' },
+    'gemini-2.5-flash': { url: 'https://sii3.top/DARK/gemini.php', param: 'text' }
 };
 
 // --- Models Endpoint ---
@@ -177,6 +181,10 @@ app.get('/v1/models', (req, res) => {
         { id: 'gpt-5', object: 'model', created: Date.now(), owned_by: 'openai' },
         { id: 'gpt-5-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
         { id: 'gpt-5-nano', object: 'model', created: Date.now(), owned_by: 'openai' },
+        // Gemini Models
+        { id: 'gemini-2.5-pro', object: 'model', created: Date.now(), owned_by: 'google' },
+        { id: 'gemini-2.5-deep-search', object: 'model', created: Date.now(), owned_by: 'google' },
+        { id: 'gemini-2.5-flash', object: 'model', created: Date.now(), owned_by: 'google' },
         { id: 'gpt-oss-120b', object: 'model', created: Date.now(), owned_by: 'gpt-oss' }
     ];
     res.json({ object: 'list', data: models });

@@ -46,7 +46,11 @@ const Rankings = () => {
         'gpt-4o': <Box size={20} />,
         'gpt-4o-mini': <Zap size={20} />,
         'gpt-4-turbo': <Box size={20} />,
-        'gpt-4': <Box size={20} />
+        'gpt-4': <Box size={20} />,
+        // Google Gemini
+        'gemini-2.5-pro': <Sparkles size={20} />,
+        'gemini-2.5-deep-search': <Sparkles size={20} />,
+        'gemini-2.5-flash': <Zap size={20} />
     };
 
     // Model descriptions
@@ -87,7 +91,11 @@ const Rankings = () => {
         'gpt-4o': 'Omni model with multimodal capabilities.',
         'gpt-4o-mini': 'Cost-effective small model for simple tasks.',
         'gpt-4-turbo': 'High-performance GPT-4 model.',
-        'gpt-4': 'Classic GPT-4 model.'
+        'gpt-4': 'Classic GPT-4 model.',
+        // Google Gemini
+        'gemini-2.5-pro': 'Latest Gemini 2.5 Pro model for complex tasks.',
+        'gemini-2.5-deep-search': 'Specialized Gemini model for deep research and search.',
+        'gemini-2.5-flash': 'High-speed, cost-effective Gemini model.'
     };
 
     // Fetch rankings data in real-time
