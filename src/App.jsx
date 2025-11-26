@@ -22,16 +22,34 @@ import Signup from './components/Signup';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('landing');
+  // Initialize from URL hash or default to landing
+  const getInitialPage = () => {
+    const hash = window.location.hash.slice(1); // Remove #
+    return hash || 'landing';
+  };
+
+  const [currentPage, setCurrentPage] = useState(getInitialPage());
 
   const navigateTo = (page) => {
     setCurrentPage(page);
+    window.location.hash = page; // Update URL
     window.scrollTo(0, 0);
   };
 
+  // Listen for hash changes (back/forward buttons)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) || 'landing';
+      setCurrentPage(hash);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   // Disable body scroll on non-homepage pages (except dashboard and api-keys which need scrolling)
   useEffect(() => {
-    if (currentPage !== 'landing' && currentPage !== 'dashboard' && currentPage !== 'api-keys') {
+    if (currentPage !== 'landing' && currentPage !== 'dashboard' && currentPage !== 'api-keys' && currentPage !== 'models' && currentPage !== 'docs' && currentPage !== 'pricing' && currentPage !== 'rankings') {
       document.body.classList.add('no-scroll');
     } else {
       document.body.classList.remove('no-scroll');

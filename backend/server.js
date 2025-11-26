@@ -109,7 +109,36 @@ const CUSTOM_MODELS = {
     'qwen-coder-plus': { url: 'https://sii3.top/api/qwen.php', param: 'prompt', extra: { model: 'qwen-coder-plus' } },
     'qwen2.5-72b-chat': { url: 'https://sii3.top/api/qwen.php', param: 'prompt', extra: { model: 'qwen2.5-72b-chat' } },
     'deepseek-v3': { url: 'https://sii3.top/api/deepseek.php', param: 'v3' },
-    'deepseek-r1': { url: 'https://sii3.top/api/deepseek.php', param: 'r1' }
+    'deepseek-r1': { url: 'https://sii3.top/api/deepseek.php', param: 'r1' },
+    'dark-code-76': { url: 'https://sii3.top/api/DarkCode.php', param: 'text' },
+    // Qwen 3 Series
+    'qwen3-coder-plus': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-coder-plus' },
+    'qwen3-coder-480b-a35b-instruct': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-coder-480b-a35b-instruct' },
+    'qwen3-72b-chat': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-72b-chat' },
+    'qwen3-72b-coder': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-72b-coder' },
+    'qwen3-72b-math': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-72b-math' },
+    'qwen3-72b-vl': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-72b-vl' },
+    'qwen3-32b-chat': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-32b-chat' },
+    'qwen3-32b-vl': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-32b-vl' },
+    // Qwen 2.5 Series
+    'qwen2.5-72b-instruct': { url: 'https://sii3.top/api/qwen.php', param: 'qwen2.5-72b-instruct' },
+    'qwen2.5-72b-instruct': { url: 'https://sii3.top/api/qwen.php', param: 'qwen2.5-72b-instruct' },
+    'qwen2.5-72b-coder-instruct': { url: 'https://sii3.top/api/qwen.php', param: 'qwen2.5-72b-coder-instruct' },
+    // OpenAI Series
+    'gpt-4': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4' },
+    'gpt-4-turbo': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4-turbo' },
+    'gpt-4o': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4o' },
+    'gpt-4o-mini': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4o-mini' },
+    'gpt-4.1': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4.1' },
+    'gpt-4.1-mini': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4.1-mini' },
+    'gpt-4.1-nano': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4.1-nano' },
+    'o1': { url: 'https://sii3.top/api/openai.php', param: 'o1' },
+    'o3': { url: 'https://sii3.top/api/openai.php', param: 'o3' },
+    'o3-mini': { url: 'https://sii3.top/api/openai.php', param: 'o3-mini' },
+    'o4-mini': { url: 'https://sii3.top/api/openai.php', param: 'o4-mini' },
+    'gpt-5': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5' },
+    'gpt-5-mini': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5-mini' },
+    'gpt-5-nano': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5-nano' }
 };
 
 // --- Models Endpoint ---
@@ -118,9 +147,36 @@ app.get('/v1/models', (req, res) => {
         // Custom Models Only (OpenAI models removed as they require API key)
         { id: 'deepseek-v3', object: 'model', created: Date.now(), owned_by: 'deepseek' },
         { id: 'deepseek-r1', object: 'model', created: Date.now(), owned_by: 'deepseek' },
+        { id: 'dark-code-76', object: 'model', created: Date.now(), owned_by: 'darkai' },
         { id: 'grok-4', object: 'model', created: Date.now(), owned_by: 'xai' },
         { id: 'qwen2.5-72b-chat', object: 'model', created: Date.now(), owned_by: 'qwen' },
         { id: 'qwen-coder-plus', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        // New Qwen Models
+        { id: 'qwen3-coder-plus', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen3-coder-480b-a35b-instruct', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen3-72b-chat', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen3-72b-coder', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen3-72b-math', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen3-72b-vl', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen3-32b-chat', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen3-32b-vl', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen2.5-72b-instruct', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'qwen2.5-72b-coder-instruct', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        // OpenAI Models
+        { id: 'gpt-4', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-4-turbo', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-4o', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-4o-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-4.1', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-4.1-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-4.1-nano', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'o1', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'o3', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'o3-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'o4-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-5', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-5-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-5-nano', object: 'model', created: Date.now(), owned_by: 'openai' },
         { id: 'gpt-oss-120b', object: 'model', created: Date.now(), owned_by: 'gpt-oss' }
     ];
     res.json({ object: 'list', data: models });
@@ -238,6 +294,7 @@ function getProviderForModel(modelId) {
     if (modelId.startsWith('grok')) return 'xAI';
     if (modelId.startsWith('qwen')) return 'Qwen';
     if (modelId.startsWith('gpt-oss')) return 'GPT-OSS';
+    if (modelId.startsWith('dark-code')) return 'DarkAI';
     return 'Unknown';
 }
 

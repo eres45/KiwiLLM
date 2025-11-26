@@ -29,7 +29,10 @@ const Footer = ({ onNavigate }) => {
             </div>
 
             <div className="footer-bottom">
-                <div className="footer-logo">KiwiLLM</div>
+                <div className="footer-logo">
+                    <img src="/logo.png" alt="KiwiLLM" className="footer-logo-image" />
+                    <span>KiwiLLM</span>
+                </div>
                 <div className="footer-legal">
                     <a href="#">About</a>
                     <a href="#">Products</a>

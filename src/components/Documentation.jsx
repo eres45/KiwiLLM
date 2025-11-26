@@ -1,15 +1,40 @@
 import React, { useState } from 'react';
 import { Book, Zap, HelpCircle, Shield, Network, Wrench, Eye, MessageSquare, Globe, Code, Activity, Lock, Settings, AlertCircle, CheckCircle, Copy, Check } from 'lucide-react';
-import CodeBlock from './CodeBlock';
+import CodeBlock from './ui/CodeBlock';
 
 const Documentation = () => {
     const [activeSection, setActiveSection] = useState('introduction');
     const [copiedCode, setCopiedCode] = useState('');
 
-    const copyToClipboard = (code, id) => {
-        navigator.clipboard.writeText(code);
-        setCopiedCode(id);
-        setTimeout(() => setCopiedCode(''), 2000);
+    const copyToClipboard = async (code, id) => {
+        try {
+            // Try modern clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(code);
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                }
+                document.body.removeChild(textArea);
+            }
+            setCopiedCode(id);
+            setTimeout(() => setCopiedCode(''), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            // Still show feedback
+            setCopiedCode(id);
+            setTimeout(() => setCopiedCode(''), 2000);
+        }
     };
 
     const sections = {
@@ -253,90 +278,92 @@ Authorization: Bearer kiwi-your-api-key-here`;
                         <h2>Available Models</h2>
                         <div className="models-grid-docs">
                             <div className="model-card-docs">
+                                <h4>gpt-5</h4>
+                                <p>Next-gen foundation model</p>
+                                <span className="model-tag">Future</span>
+                            </div>
+                            <div className="model-card-docs">
+                                <h4>o3</h4>
+                                <p>Advanced reasoning model</p>
+                                <span className="model-tag">Reasoning</span>
+                            </div>
+                            <div className="model-card-docs">
                                 <h4>deepseek-v3</h4>
-                                <p>Latest DeepSeek model with enhanced reasoning</p>
+                                <p>Latest DeepSeek model</p>
                                 <span className="model-tag">Recommended</span>
                             </div>
                             <div className="model-card-docs">
-                                <h4>deepseek-r1</h4>
-                                <p>DeepSeek R1 with improved performance</p>
+                                <h4>qwen3-coder-plus</h4>
+                                <p>Flagship Qwen 3 coding model</p>
+                                <span className="model-tag">SOTA</span>
                             </div>
                             <div className="model-card-docs">
-                                <h4>grok-4</h4>
-                                <p>xAI's Grok-4 model</p>
-                                <span className="model-tag">Fast</span>
+                                <h4>dark-code-76</h4>
+                                <p>Powerful 12B coding model</p>
+                                <span className="model-tag">Coding</span>
                             </div>
-                            <div className="model-card-docs">
-                                <h4>qwen2.5-72b-chat</h4>
-                                <p>Qwen 2.5 72B parameter model</p>
-                            </div>
-                            <div className="model-card-docs">
-                                <h4>qwen-coder-plus</h4>
-                                <p>Specialized for code generation</p>
-                                <span className="model-tag">Code</span>
-                            </div>
-                            <div className="model-card-docs">
-                                <h4>gpt-oss-120b</h4>
-                                <p>Open-source GPT alternative</p>
+                        </div>
+
+                        <h2>Automatic Failover</h2>
+                        <p>If a provider is temporarily unavailable, requests will fail with an appropriate error message. You can retry with a different model or wait for the service to recover.</p>
+
+                        <div className="alert-box-docs info">
+                            <AlertCircle size={18} />
+                            <div>
+                                <strong>Model Availability</strong>
+                                <p>Provider availability is monitored in real-time. Check the Models page for current status.</p>
                             </div>
                         </div>
                     </div>
                 );
 
-            case 'chat':
-                const chatExample = `curl https://kiwillm.onrender.com/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer kiwi-your-api-key-here" \\
-  -d '{
-    "model": "deepseek-v3",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Explain quantum computing"}
-    ],
-    "temperature": 0.7,
-    "max_tokens": 500
-  }'`;
-
-                const chatResponse = `{
-  "id": "chatcmpl-1732060800",
-  "object": "chat.completion",
-  "created": 1732060800,
-  "model": "deepseek-v3",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Quantum computing is a revolutionary..."
-      },
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 20,
-    "completion_tokens": 150,
-    "total_tokens": 170
-  }
-}`;
-
+            case 'tools':
                 return (
                     <div className="doc-content">
-                        <h1>Chat Completions</h1>
-                        <p className="lead">Generate AI responses using chat-based models.</p>
+                        <h1>Tool Calling</h1>
+                        <p className="lead">Function calling and tool use capabilities.</p>
 
-                        <h2>Endpoint</h2>
-                        <div className="endpoint-box">
-                            <span className="method-badge post">POST</span>
-                            <code>/v1/chat/completions</code>
+                        <h2>Current Status</h2>
+                        <div className="alert-box-docs info">
+                            <AlertCircle size={18} />
+                            <div>
+                                <strong>Coming Soon</strong>
+                                <p>Tool calling (function calling) is not currently supported for custom models. This feature is planned for a future release.</p>
+                            </div>
                         </div>
 
-                        <h2>Request Body</h2>
+                        <h2>What is Tool Calling?</h2>
+                        <p>Tool calling allows AI models to generate structured outputs that can be used to call external functions or APIs. This is useful for:</p>
+                        <ul>
+                            <li>Database queries</li>
+                            <li>API integrations</li>
+                            <li>Mathematical computations</li>
+                            <li>Real-time data retrieval</li>
+                        </ul>
+
+                        <h2>Workaround</h2>
+                        <p>While native tool calling isn't supported, you can achieve similar results by:</p>
+                        <ol>
+                            <li>Instructing the model to return JSON in a specific format</li>
+                            <li>Parsing the model's response</li>
+                            <li>Executing your own function calls based on the parsed data</li>
+                        </ol>
+                    </div>
+                );
+
+            case 'parameters':
+                return (
+                    <div className="doc-content">
+                        <h1>Request Parameters</h1>
+                        <p className="lead">Complete reference of all available parameters for chat completions.</p>
+
+                        <h2>Supported Parameters</h2>
                         <table className="docs-table">
                             <thead>
                                 <tr>
                                     <th>Parameter</th>
                                     <th>Type</th>
-                                    <th>Required</th>
+                                    <th>Default</th>
                                     <th>Description</th>
                                 </tr>
                             </thead>
@@ -344,120 +371,65 @@ Authorization: Bearer kiwi-your-api-key-here`;
                                 <tr>
                                     <td><code>model</code></td>
                                     <td>string</td>
-                                    <td><CheckCircle size={16} className="check-icon" /></td>
-                                    <td>Model ID to use</td>
+                                    <td>-</td>
+                                    <td>Required. Model ID to use (e.g., "deepseek-v3")</td>
                                 </tr>
                                 <tr>
                                     <td><code>messages</code></td>
                                     <td>array</td>
-                                    <td><CheckCircle size={16} className="check-icon" /></td>
-                                    <td>Array of message objects</td>
+                                    <td>-</td>
+                                    <td>Required. Array of message objects with 'role' and 'content'</td>
                                 </tr>
                                 <tr>
                                     <td><code>temperature</code></td>
                                     <td>number</td>
-                                    <td>-</td>
-                                    <td>Sampling temperature (0-2)</td>
+                                    <td>0.7</td>
+                                    <td>Sampling temperature (0-2). Higher = more random</td>
                                 </tr>
                                 <tr>
                                     <td><code>max_tokens</code></td>
                                     <td>integer</td>
                                     <td>-</td>
-                                    <td>Maximum tokens to generate</td>
+                                    <td>Maximum tokens to generate in the response</td>
+                                </tr>
+                                <tr>
+                                    <td><code>top_p</code></td>
+                                    <td>number</td>
+                                    <td>1.0</td>
+                                    <td>Nucleus sampling parameter (0-1)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>n</code></td>
+                                    <td>integer</td>
+                                    <td>1</td>
+                                    <td>Number of completions to generate</td>
+                                </tr>
+                                <tr>
+                                    <td><code>stop</code></td>
+                                    <td>string/array</td>
+                                    <td>null</td>
+                                    <td>Stop sequences where the model will stop generating</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <h2>Request Example</h2>
-                        <CodeBlock code={chatExample} language="bash" />
-
-                        <h2>Response</h2>
-                        <CodeBlock code={chatResponse} language="json" />
-
-                        <div className="alert-box-docs success">
-                            <CheckCircle size={18} />
+                        <div className="alert-box-docs info">
+                            <AlertCircle size={18} />
                             <div>
-                                <strong>OpenAI Compatible</strong>
-                                <p>This endpoint is fully compatible with the OpenAI Chat Completions API. You can use any OpenAI SDK!</p>
+                                <strong>Note on Parameter Support</strong>
+                                <p>Some advanced parameters may not be supported by all custom models. The API will accept them but they may be ignored by certain providers.</p>
                             </div>
                         </div>
-                    </div>
-                );
 
-            case 'errors':
-                const errorExample = `{
-  "error": {
-    "message": "Invalid API Key",
-    "type": "invalid_request_error",
-    "code": "invalid_api_key"
-  }
-}`;
-
-                return (
-                    <div className="doc-content">
-                        <h1>Error Handling</h1>
-                        <p className="lead">Understand and handle API errors effectively.</p>
-
-                        <h2>Error Response Format</h2>
-                        <CodeBlock code={errorExample} language="json" />
-
-                        <h2>HTTP Status Codes</h2>
-                        <table className="docs-table">
-                            <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Status</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><code>200</code></td>
-                                    <td>OK</td>
-                                    <td>Request successful</td>
-                                </tr>
-                                <tr>
-                                    <td><code>401</code></td>
-                                    <td>Unauthorized</td>
-                                    <td>Invalid or missing API key</td>
-                                </tr>
-                                <tr>
-                                    <td><code>403</code></td>
-                                    <td>Forbidden</td>
-                                    <td>API key is inactive or revoked</td>
-                                </tr>
-                                <tr>
-                                    <td><code>429</code></td>
-                                    <td>Too Many Requests</td>
-                                    <td>Rate limit exceeded</td>
-                                </tr>
-                                <tr>
-                                    <td><code>500</code></td>
-                                    <td>Internal Server Error</td>
-                                    <td>Server error - try again later</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <h2>Common Error Codes</h2>
-                        <div className="error-codes-grid">
-                            <div className="error-code-card">
-                                <code>invalid_api_key</code>
-                                <p>The API key provided is invalid or has been revoked</p>
-                            </div>
-                            <div className="error-code-card">
-                                <code>rate_limit_exceeded</code>
-                                <p>You have exceeded your rate limit. Wait before making more requests</p>
-                            </div>
-                            <div className="error-code-card">
-                                <code>invalid_request_error</code>
-                                <p>The request was malformed or missing required parameters</p>
-                            </div>
-                            <div className="error-code-card">
-                                <code>model_not_found</code>
-                                <p>The specified model does not exist</p>
-                            </div>
-                        </div>
+                        <h2>Message Format</h2>
+                        <p>Messages must follow this structure:</p>
+                        <CodeBlock
+                            code={`{
+  "role": "user" | "assistant" | "system",
+  "content": "Your message text here"
+}`}
+                            language="json"
+                        />
                     </div>
                 );
 

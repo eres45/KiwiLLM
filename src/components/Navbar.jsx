@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Hexagon, Menu, X, User, LogOut, LayoutDashboard, Key, ChevronDown } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Key, ChevronDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = ({ onNavigate }) => {
@@ -40,7 +40,7 @@ const Navbar = ({ onNavigate }) => {
         <nav className="navbar">
             <div className="nav-container">
                 <div className="nav-logo" onClick={() => handleNavigate('landing')}>
-                    <Hexagon size={32} className="logo-icon" />
+                    <img src="/logo.png" alt="KiwiLLM" className="logo-image" />
                     <span className="logo-text">KiwiLLM</span>
                 </div>
 
