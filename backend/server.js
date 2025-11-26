@@ -680,6 +680,24 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                 if (finalMessages.length > 0 && finalMessages[0].role === 'system') {
                     finalMessages[0].content = `${systemPrompt} ${finalMessages[0].content}`;
                 } else {
+                    finalMessages.unshift({ role: 'system', content: systemPrompt });
+                }
+
+                try {
+                    const shouldStream = req.body.stream === true;
+
+                    const response = await fetch(config.url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${process.env.DEEPINFRA_API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: config.modelId,
+                            messages: finalMessages,
+                            stream: shouldStream
+                        })
+                    });
 
                     // Check if response is OK
                     if (!response.ok) {
@@ -776,6 +794,7 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                         }
                     });
                 }
+                return;
             }
 
             // Handle GET-based APIs (existing logic)
