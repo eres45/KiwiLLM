@@ -577,42 +577,63 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
 
             // Handle POST-based APIs (DeepInfra, etc.)
             if (config.type === 'post') {
-                const response = await fetch(config.url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: config.modelId,
-                        messages: messages
-                    })
-                });
+                try {
+                    const response = await fetch(config.url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // Add Origin header to prevent some CORS issues if applicable, though this is server-to-server
+                            'Origin': 'https://kiwillm.web.app'
+                        },
+                        body: JSON.stringify({
+                            model: config.modelId,
+                            messages: messages,
+                            stream: false
+                        })
+                    });
 
-                const data = await response.json();
-
-                // Extract content from OpenAI-compatible response
-                const content = data.choices[0].message.content;
-                const promptTokens = data.usage?.prompt_tokens || estimateTokens(messages.map(m => m.content).join(''));
-                const completionTokens = data.usage?.completion_tokens || estimateTokens(content);
-
-                // Track usage
-                await trackUsage(req.user.userId, model, promptTokens, completionTokens, true);
-
-                // Return in OpenAI format
-                return res.json({
-                    id: data.id || `chatcmpl-${Date.now()}`,
-                    object: 'chat.completion',
-                    created: data.created || Math.floor(Date.now() / 1000),
-                    model: model,
-                    choices: [{
-                        index: 0,
-                        message: { role: 'assistant', content: content },
-                        finish_reason: 'stop'
-                    }],
-                    usage: {
-                        prompt_tokens: promptTokens,
-                        completion_tokens: completionTokens,
-                        total_tokens: promptTokens + completionTokens
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`DeepInfra API Error (${response.status}):`, errorText);
+                        throw new Error(`Provider API error: ${response.status} ${errorText}`);
                     }
-                });
+
+                    const data = await response.json();
+
+                    // Extract content from OpenAI-compatible response
+                    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                        console.error('Invalid DeepInfra response format:', data);
+                        throw new Error('Invalid response format from provider');
+                    }
+
+                    const content = data.choices[0].message.content;
+                    const promptTokens = data.usage?.prompt_tokens || estimateTokens(messages.map(m => m.content).join(''));
+                    const completionTokens = data.usage?.completion_tokens || estimateTokens(content);
+
+                    // Track usage
+                    await trackUsage(req.user.userId, model, promptTokens, completionTokens, true);
+
+                    // Return in OpenAI format
+                    return res.json({
+                        id: data.id || `chatcmpl-${Date.now()}`,
+                        object: 'chat.completion',
+                        created: data.created || Math.floor(Date.now() / 1000),
+                        model: model,
+                        choices: [{
+                            index: 0,
+                            message: { role: 'assistant', content: content },
+                            finish_reason: 'stop'
+                        }],
+                        usage: {
+                            prompt_tokens: promptTokens,
+                            completion_tokens: completionTokens,
+                            total_tokens: promptTokens + completionTokens
+                        }
+                    });
+                } catch (error) {
+                    console.error('DeepInfra Request Failed:', error);
+                    throw error; // Re-throw to be caught by outer try-catch
+                }
             }
 
             // Handle GET-based APIs (existing logic)

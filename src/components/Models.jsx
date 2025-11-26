@@ -361,107 +361,107 @@ const Models = () => {
         // DeepInfra Models (Top Selections)
         {
             id: 'deepseek-ai/DeepSeek-V3.1',
-            name: 'DeepSeek V3.1 (DeepInfra)',
-            provider: 'DeepInfra',
-            desc: 'Most capable DeepSeek model via DeepInfra infrastructure.',
+            name: 'DeepSeek V3.1',
+            provider: 'DeepSeek',
+            desc: 'Most capable DeepSeek model via high-performance infrastructure.',
             context: '128k',
-            tags: ['SOTA', 'DeepInfra'],
+            tags: ['SOTA', 'Reasoning'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'deepseek-ai/DeepSeek-R1',
-            name: 'DeepSeek R1 (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'DeepSeek R1',
+            provider: 'DeepSeek',
             desc: 'Advanced reasoning model with chain-of-thought capabilities.',
             context: '128k',
-            tags: ['Reasoning', 'DeepInfra'],
+            tags: ['Reasoning', 'SOTA'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'Qwen/Qwen3-235B-A22B-Thinking-2507',
-            name: 'Qwen3 235B Thinking (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Qwen3 235B Thinking',
+            provider: 'Qwen',
             desc: 'Massive Qwen model with advanced reasoning capabilities.',
             context: '128k',
-            tags: ['Reasoning', 'SOTA', 'DeepInfra'],
+            tags: ['Reasoning', 'SOTA'],
             icon: <MessageSquare size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'meta-llama/Meta-Llama-3.1-70B-Instruct',
-            name: 'Llama 3.1 70B (DeepInfra)',
-            provider: 'DeepInfra',
-            desc: 'Meta\'s flagship open-source model via DeepInfra.',
+            name: 'Llama 3.1 70B',
+            provider: 'Meta',
+            desc: 'Meta\'s flagship open-source model.',
             context: '128k',
-            tags: ['Open Source', 'DeepInfra'],
+            tags: ['Open Source', 'SOTA'],
             icon: <Box size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'anthropic/claude-4-sonnet',
-            name: 'Claude 4 Sonnet (DeepInfra)',
-            provider: 'DeepInfra',
-            desc: 'Anthropic\'s latest Claude model via DeepInfra.',
+            name: 'Claude 4 Sonnet',
+            provider: 'Anthropic',
+            desc: 'Anthropic\'s latest Claude model.',
             context: '200k',
-            tags: ['SOTA', 'DeepInfra'],
+            tags: ['SOTA', 'Reliable'],
             icon: <Sparkles size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'Qwen/Qwen3-Coder-480B-A35B-Instruct',
-            name: 'Qwen3 Coder 480B (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Qwen3 Coder 480B',
+            provider: 'Qwen',
             desc: 'World\'s most powerful open coding model.',
             context: '128k',
-            tags: ['Coding', 'SOTA', 'DeepInfra'],
+            tags: ['Coding', 'SOTA'],
             icon: <Code size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'google/gemini-2.5-flash',
-            name: 'Gemini 2.5 Flash (DeepInfra)',
-            provider: 'DeepInfra',
-            desc: 'Google\'s fast Gemini model via DeepInfra infrastructure.',
+            name: 'Gemini 2.5 Flash',
+            provider: 'Google',
+            desc: 'Google\'s fast Gemini model.',
             context: '1m',
-            tags: ['Fast', 'DeepInfra'],
+            tags: ['Fast', 'Efficient'],
             icon: <Zap size={24} />,
             tier: 'Free Tier'
         },
         {
             id: 'nvidia/Llama-3.1-Nemotron-70B-Instruct',
-            name: 'Nemotron 70B (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Nemotron 70B',
+            provider: 'Nvidia',
             desc: 'NVIDIA\'s enhanced Llama model for superior performance.',
             context: '128k',
-            tags: ['Enhanced', 'DeepInfra'],
+            tags: ['Enhanced', 'SOTA'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'mistralai/Mistral-Small-3.2-24B-Instruct-2506',
-            name: 'Mistral Small 3.2 (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Mistral Small 3.2',
+            provider: 'Mistral',
             desc: 'Efficient Mistral model for balanced performance.',
             context: '128k',
-            tags: ['Efficient', 'DeepInfra'],
+            tags: ['Efficient', 'Fast'],
             icon: <Sparkles size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'NousResearch/Hermes-3-Llama-3.1-405B',
-            name: 'Hermes 3 405B (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Hermes 3 405B',
+            provider: 'NousResearch',
             desc: 'Largest open-source model with exceptional capabilities.',
             context: '128k',
-            tags: ['SOTA', 'Open Source', 'DeepInfra'],
+            tags: ['SOTA', 'Open Source'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
         }
     ];
 
-    const providers = ['All Providers', 'DeepSeek', 'xAI', 'Qwen', 'GPT-OSS', 'Anthropic', 'OpenAI', 'Google', 'Meta', 'Mistral', 'DeepInfra'];
+    const providers = ['All Providers', 'DeepSeek', 'xAI', 'Qwen', 'GPT-OSS', 'Anthropic', 'OpenAI', 'Google', 'Meta', 'Mistral'];
 
     // Fetch uptime data from Firestore
     useEffect(() => {
@@ -470,78 +470,45 @@ const Models = () => {
                 const uptimeCollection = collection(db, 'modelUptime');
                 const uptimeSnapshot = await getDocs(uptimeCollection);
                 const uptimeMap = {};
-
                 uptimeSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    const uptime = data.totalChecks > 0
-                        ? ((data.successfulChecks / data.totalChecks) * 100).toFixed(2)
-                        : '99.95';
-                    uptimeMap[doc.id] = uptime;
+                    uptimeMap[doc.id] = doc.data();
                 });
-
                 setUptimeData(uptimeMap);
-            } catch (error) {
-                console.error('Error fetching uptime:', error);
-                const defaultUptime = {};
-                models.forEach(model => {
-                    defaultUptime[model.id] = '99.95';
-                });
-                setUptimeData(defaultUptime);
+            } catch (err) {
+                console.error("Error fetching uptime data:", err);
             }
         };
 
         fetchUptimeData();
     }, []);
 
+    // Filter models
+    const filteredModels = models.filter(model => {
+        const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            model.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            model.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesProvider = selectedProvider === 'All Providers' || model.provider === selectedProvider;
+        const matchesTier = selectedTier === 'All Tiers' || model.tier === selectedTier;
+        return matchesSearch && matchesProvider && matchesTier;
+    });
+
     return (
-        <div className="models-page-container">
+        <div className="models-page">
             <div className="models-header">
-                <h1>AI Models</h1>
-                <p>Access a wide range of powerful AI models through our platform</p>
+                <h1><Box className="icon-title" /> Models Library</h1>
+                <p>Explore our diverse collection of {models.length} high-performance LLMs.</p>
             </div>
 
-            {/* Search Bar Section */}
-            <div style={{ maxWidth: '1200px', margin: '0 auto 2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', paddingLeft: '1rem' }}>
-                    <label style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Search Models</label>
-                    <label style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Filter by Purpose</label>
-                </div>
-
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    background: '#0a0a0a',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '12px',
-                    border: '1px solid #27272a'
-                }}>
-                    <div style={{ position: 'relative', flex: '0 0 300px' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#71717a' }} />
-                        <input
-                            type="text"
-                            placeholder="Search models..."
-                            style={{
-                                width: '100%',
-                                background: '#18181b',
-                                border: '1px solid #27272a',
-                                padding: '0.65rem 1rem 0.65rem 2.5rem',
-                                borderRadius: '8px',
-                                color: 'white',
-                                outline: 'none',
-                                fontSize: '0.9rem'
-                            }}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem', flex: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                        <button className="filter-pill active"><LayoutGrid size={14} /> All Types</button>
-                        <button className="filter-pill"><Mic size={14} /> Audio & Speech</button>
-                        <button className="filter-pill"><MessageSquare size={14} /> Chat & Completion</button>
-                        <button className="filter-pill"><Image size={14} /> Images</button>
-                    </div>
+            <div className="models-controls">
+                <div className="search-bar-container">
+                    <Search className="search-icon" size={20} />
+                    <input
+                        type="text"
+                        placeholder={`Search ${models.length} models...`}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="models-search-input"
+                    />
                 </div>
             </div>
 
@@ -621,7 +588,7 @@ const Models = () => {
                     </div>
                 ))}
             </div>
-        </div>
+        </div >
     );
 };
 
