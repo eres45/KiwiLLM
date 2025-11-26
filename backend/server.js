@@ -444,11 +444,6 @@ app.get('/v1/models', (req, res) => {
     res.json({ object: 'list', data: models });
 });
 
-// --- Check Key Endpoint ---
-app.get('/v1/check-key', validateKey, (req, res) => {
-    res.json({ valid: true, user: req.user });
-});
-
 // --- Usage Tracking Helper ---
 async function trackUsage(userId, model, promptTokens, completionTokens, success = true, error = null) {
     try {
@@ -482,7 +477,9 @@ async function trackUsage(userId, model, promptTokens, completionTokens, success
 // --- Global Model Rankings Aggregation ---
 async function updateModelRankings(model, tokens, userId, today) {
     try {
-        const rankingRef = db.collection('modelRankings').doc(model);
+        // Sanitize model ID for Firestore (replace / with _)
+        const safeModelId = model.replace(/\//g, '_');
+        const rankingRef = db.collection('modelRankings').doc(safeModelId);
 
         // Use transaction to prevent race conditions
         await db.runTransaction(async (transaction) => {
@@ -567,6 +564,104 @@ function estimateTokens(text) {
 }
 
 // --- Chat Completions Endpoint ---
+// (Moved down)
+
+// --- Embeddings Endpoint ---
+app.post('/v1/embeddings', validateKey, async (req, res) => {
+    const { model, input } = req.body;
+
+    try {
+        // Check if it's a DeepInfra model (or just pass through if we assume it is)
+        // We can check CUSTOM_MODELS or just try DeepInfra
+        // For now, we'll assume if it hits this endpoint and matches a DeepInfra ID, we use DeepInfra.
+
+        const deepInfraUrl = 'https://api.deepinfra.com/v1/openai/embeddings';
+
+        const response = await fetch(deepInfraUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.DEEPINFRA_API_KEY}`
+            },
+            body: JSON.stringify({ model, input })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`DeepInfra Embeddings API error for ${model}:`, response.status, errorText);
+            return res.status(response.status).json({
+                error: {
+                    message: `DeepInfra API returned ${response.status}: ${errorText}`,
+                    type: 'api_error',
+                    code: response.status
+                }
+            });
+        }
+
+        const data = await response.json();
+
+        // Track usage (input tokens only for embeddings)
+        const promptTokens = data.usage?.prompt_tokens || estimateTokens(Array.isArray(input) ? input.join('') : input);
+        await trackUsage(req.user.userId, model, promptTokens, 0, true);
+
+        res.json(data);
+
+    } catch (error) {
+        console.error('Embeddings Proxy Error:', error);
+        await trackUsage(req.user.userId, model, 0, 0, false, error.message);
+        res.status(500).json({ error: 'Upstream Provider Error', details: error.message });
+    }
+});
+
+// --- Image Generation Endpoint ---
+app.post('/v1/images/generations', validateKey, async (req, res) => {
+    const { model, prompt, n, size, response_format } = req.body;
+
+    try {
+        // DeepInfra Image Gen Endpoint (OpenAI Compatible)
+        // Some models might need specific inference endpoints, but many support the standard one.
+        // We will try the standard OpenAI-compatible endpoint first.
+        const deepInfraUrl = 'https://api.deepinfra.com/v1/openai/images/generations';
+
+        const response = await fetch(deepInfraUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.DEEPINFRA_API_KEY}`
+            },
+            body: JSON.stringify({ model, prompt, n, size, response_format })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`DeepInfra Image Gen API error for ${model}:`, response.status, errorText);
+            return res.status(response.status).json({
+                error: {
+                    message: `DeepInfra API returned ${response.status}: ${errorText}`,
+                    type: 'api_error',
+                    code: response.status
+                }
+            });
+        }
+
+        const data = await response.json();
+
+        // Track usage (1 request, maybe estimate tokens equivalent?)
+        // For now, we'll just track 0 tokens but successful request.
+        // Or we could assign a fixed cost like 1000 tokens per image.
+        const estimatedTokens = 1000 * (n || 1);
+        await trackUsage(req.user.userId, model, estimatedTokens, 0, true);
+
+        res.json(data);
+
+    } catch (error) {
+        console.error('Image Gen Proxy Error:', error);
+        await trackUsage(req.user.userId, model, 0, 0, false, error.message);
+        res.status(500).json({ error: 'Upstream Provider Error', details: error.message });
+    }
+});
+
+// --- Chat Completions Endpoint ---
 app.post('/v1/chat/completions', validateKey, async (req, res) => {
     const { model, messages } = req.body;
 
@@ -577,15 +672,14 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
 
             // Handle POST-based APIs (DeepInfra, etc.)
             if (config.type === 'post') {
-                try {
-                    const response = await fetch(config.url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            model: config.modelId,
-                            messages: messages
-                        })
-                    });
+                // Identity Injection
+                const modelName = config.modelId.split('/').pop() || model;
+                const systemPrompt = `You are ${modelName}, a helpful AI assistant.`;
+
+                let finalMessages = [...messages];
+                if (finalMessages.length > 0 && finalMessages[0].role === 'system') {
+                    finalMessages[0].content = `${systemPrompt} ${finalMessages[0].content}`;
+                } else {
 
                     // Check if response is OK
                     if (!response.ok) {
@@ -598,6 +692,39 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                                 code: response.status
                             }
                         });
+                    }
+
+                    // Handle Streaming Response
+                    if (shouldStream) {
+                        res.setHeader('Content-Type', 'text/event-stream');
+                        res.setHeader('Cache-Control', 'no-cache');
+                        res.setHeader('Connection', 'keep-alive');
+
+                        if (response.body.pipe) {
+                            // Node-fetch style
+                            response.body.pipe(res);
+                        } else if (response.body.getReader) {
+                            // Web Stream style (Native fetch)
+                            const reader = response.body.getReader();
+                            try {
+                                while (true) {
+                                    const { done, value } = await reader.read();
+                                    if (done) break;
+                                    res.write(value);
+                                }
+                            } catch (err) {
+                                console.error('Stream error:', err);
+                            } finally {
+                                res.end();
+                            }
+                        } else {
+                            // Fallback for other stream types (e.g. iterator)
+                            for await (const chunk of response.body) {
+                                res.write(chunk);
+                            }
+                            res.end();
+                        }
+                        return;
                     }
 
                     const data = await response.json();
