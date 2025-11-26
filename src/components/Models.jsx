@@ -357,6 +357,37 @@ const Models = () => {
             tags: ['Fast', 'Efficient'],
             icon: <Zap size={24} />,
             tier: 'Free Tier'
+        },
+        // Google Gemma Series
+        {
+            id: 'gemma-2-4b',
+            name: 'gemma-2-4b',
+            provider: 'Google',
+            desc: 'Compact 4B parameter Gemma model for efficient inference.',
+            context: '8k',
+            tags: ['Efficient', 'Lightweight'],
+            icon: <Zap size={24} />,
+            tier: 'Free Tier'
+        },
+        {
+            id: 'gemma-2-12b',
+            name: 'gemma-2-12b',
+            provider: 'Google',
+            desc: 'Balanced 12B Gemma model for versatile tasks.',
+            context: '8k',
+            tags: ['Balanced', 'Versatile'],
+            icon: <Cpu size={24} />,
+            tier: 'Free Tier'
+        },
+        {
+            id: 'gemma-2-27b',
+            name: 'gemma-2-27b',
+            provider: 'Google',
+            desc: 'Powerful 27B Gemma model for complex reasoning.',
+            context: '8k',
+            tags: ['SOTA', 'Reasoning'],
+            icon: <Sparkles size={24} />,
+            tier: 'Pro Tier'
         }
     ];
 

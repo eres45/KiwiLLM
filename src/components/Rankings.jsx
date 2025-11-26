@@ -50,7 +50,11 @@ const Rankings = () => {
         // Google Gemini
         'gemini-2.5-pro': <Sparkles size={20} />,
         'gemini-2.5-deep-search': <Sparkles size={20} />,
-        'gemini-2.5-flash': <Zap size={20} />
+        'gemini-2.5-flash': <Zap size={20} />,
+        // Google Gemma
+        'gemma-2-4b': <Zap size={20} />,
+        'gemma-2-12b': <Cpu size={20} />,
+        'gemma-2-27b': <Sparkles size={20} />
     };
 
     // Model descriptions
@@ -95,7 +99,11 @@ const Rankings = () => {
         // Google Gemini
         'gemini-2.5-pro': 'Latest Gemini 2.5 Pro model for complex tasks.',
         'gemini-2.5-deep-search': 'Specialized Gemini model for deep research and search.',
-        'gemini-2.5-flash': 'High-speed, cost-effective Gemini model.'
+        'gemini-2.5-flash': 'High-speed, cost-effective Gemini model.',
+        // Google Gemma
+        'gemma-2-4b': 'Compact 4B parameter Gemma model for efficient inference.',
+        'gemma-2-12b': 'Balanced 12B Gemma model for versatile tasks.',
+        'gemma-2-27b': 'Powerful 27B Gemma model for complex reasoning.'
     };
 
     // Fetch rankings data in real-time

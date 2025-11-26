@@ -303,6 +303,11 @@ Authorization: Bearer kiwi-your-api-key-here`;
                                 <span className="model-tag">SOTA</span>
                             </div>
                             <div className="model-card-docs">
+                                <h4>gemma-2-27b</h4>
+                                <p>Powerful Google Gemma model</p>
+                                <span className="model-tag">Reasoning</span>
+                            </div>
+                            <div className="model-card-docs">
                                 <h4>dark-code-76</h4>
                                 <p>Powerful 12B coding model</p>
                                 <span className="model-tag">Coding</span>

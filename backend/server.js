@@ -142,7 +142,11 @@ const CUSTOM_MODELS = {
     // Gemini Series
     'gemini-2.5-pro': { url: 'https://sii3.top/api/gemini-dark.php', param: 'gemini-pro' },
     'gemini-2.5-deep-search': { url: 'https://sii3.top/api/gemini-dark.php', param: 'gemini-deep' },
-    'gemini-2.5-flash': { url: 'https://sii3.top/DARK/gemini.php', param: 'text' }
+    'gemini-2.5-flash': { url: 'https://sii3.top/DARK/gemini.php', param: 'text' },
+    // Gemma Series
+    'gemma-2-4b': { url: 'https://sii3.top/api/gemma.php', param: '4b' },
+    'gemma-2-12b': { url: 'https://sii3.top/api/gemma.php', param: '12b' },
+    'gemma-2-27b': { url: 'https://sii3.top/api/gemma.php', param: '27b' }
 };
 
 // --- Models Endpoint ---
@@ -185,6 +189,10 @@ app.get('/v1/models', (req, res) => {
         { id: 'gemini-2.5-pro', object: 'model', created: Date.now(), owned_by: 'google' },
         { id: 'gemini-2.5-deep-search', object: 'model', created: Date.now(), owned_by: 'google' },
         { id: 'gemini-2.5-flash', object: 'model', created: Date.now(), owned_by: 'google' },
+        // Gemma Models
+        { id: 'gemma-2-4b', object: 'model', created: Date.now(), owned_by: 'google' },
+        { id: 'gemma-2-12b', object: 'model', created: Date.now(), owned_by: 'google' },
+        { id: 'gemma-2-27b', object: 'model', created: Date.now(), owned_by: 'google' },
         { id: 'gpt-oss-120b', object: 'model', created: Date.now(), owned_by: 'gpt-oss' }
     ];
     res.json({ object: 'list', data: models });
