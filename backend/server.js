@@ -136,8 +136,9 @@ async function trackUsage(userId, model, promptTokens, completionTokens, success
     try {
         const userRef = db.collection('users').doc(userId);
         const totalTokens = promptTokens + completionTokens;
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-        // Update aggregated stats
+        // Update user stats
         await userRef.set({
             stats: {
                 totalRequests: admin.firestore.FieldValue.increment(1),
@@ -152,9 +153,92 @@ async function trackUsage(userId, model, promptTokens, completionTokens, success
                 [`modelUsage.${model}.lastUsed`]: new Date().toISOString()
             }
         }, { merge: true });
+
+        // Update global model rankings
+        await updateModelRankings(model, totalTokens, userId, today);
     } catch (err) {
         console.error('Failed to track usage:', err);
     }
+}
+
+// --- Global Model Rankings Aggregation ---
+async function updateModelRankings(model, tokens, userId, today) {
+    try {
+        const rankingRef = db.collection('modelRankings').doc(model);
+
+        // Use transaction to prevent race conditions
+        await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(rankingRef);
+
+            if (!doc.exists) {
+                // Initialize new model ranking
+                transaction.set(rankingRef, {
+                    modelId: model,
+                    modelName: model,
+                    provider: getProviderForModel(model),
+                    totalTokens: tokens,
+                    totalRequests: 1,
+                    uniqueUsers: [userId],
+                    lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+                    tokensToday: tokens,
+                    tokensThisWeek: tokens,
+                    tokensThisMonth: tokens,
+                    dailyStats: {
+                        [today]: tokens
+                    },
+                    trendPercentage: 0
+                });
+            } else {
+                const data = doc.data();
+                const uniqueUsers = data.uniqueUsers || [];
+
+                // Add user if not already tracked
+                if (!uniqueUsers.includes(userId)) {
+                    uniqueUsers.push(userId);
+                }
+
+                // Update daily stats
+                const dailyStats = data.dailyStats || {};
+                dailyStats[today] = (dailyStats[today] || 0) + tokens;
+
+                // Keep only last 40 days
+                const sortedDates = Object.keys(dailyStats).sort().reverse();
+                const recentStats = {};
+                sortedDates.slice(0, 40).forEach(date => {
+                    recentStats[date] = dailyStats[date];
+                });
+
+                // Calculate trending (% change from yesterday)
+                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+                const tokensYesterday = dailyStats[yesterday] || 0;
+                const tokensCurrentDay = dailyStats[today] || 0;
+                const trendPercentage = tokensYesterday > 0
+                    ? ((tokensCurrentDay - tokensYesterday) / tokensYesterday * 100).toFixed(2)
+                    : 0;
+
+                transaction.update(rankingRef, {
+                    totalTokens: admin.firestore.FieldValue.increment(tokens),
+                    totalRequests: admin.firestore.FieldValue.increment(1),
+                    uniqueUsers: uniqueUsers,
+                    lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+                    tokensToday: admin.firestore.FieldValue.increment(tokens),
+                    dailyStats: recentStats,
+                    trendPercentage: parseFloat(trendPercentage)
+                });
+            }
+        });
+    } catch (err) {
+        console.error('Failed to update model rankings:', err);
+    }
+}
+
+// Helper to get provider name from model ID
+function getProviderForModel(modelId) {
+    if (modelId.startsWith('deepseek')) return 'DeepSeek';
+    if (modelId.startsWith('grok')) return 'xAI';
+    if (modelId.startsWith('qwen')) return 'Qwen';
+    if (modelId.startsWith('gpt-oss')) return 'GPT-OSS';
+    return 'Unknown';
 }
 
 // Helper to estimate tokens from text (roughly 1 token = 4 characters)
