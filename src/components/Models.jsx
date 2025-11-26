@@ -531,10 +531,54 @@ const Models = () => {
         { id: 'deepseek-ai/DeepSeek-OCR', name: 'DeepSeek OCR', provider: 'DeepSeek', desc: 'OCR specialized model.', context: '128k', tags: ['OCR', 'Vision'], icon: <Image size={24} />, tier: 'Pro Tier' },
         { id: 'PaddlePaddle/PaddleOCR-VL-0.9B', name: 'PaddleOCR VL', provider: 'PaddlePaddle', desc: 'PaddleOCR vision model.', context: '8k', tags: ['OCR'], icon: <Image size={24} />, tier: 'Free Tier' },
         { id: 'allenai/olmOCR-2-7B-1025', name: 'olmOCR 2 7B', provider: 'AllenAI', desc: 'AllenAI OCR model.', context: '128k', tags: ['OCR'], icon: <Image size={24} />, tier: 'Pro Tier' },
-        { id: 'ByteDance/Seedream-4', name: 'Seedream 4', provider: 'ByteDance', desc: 'Video generation model.', context: '8k', tags: ['Video'], icon: <Image size={24} />, tier: 'Pro Tier' }
+        { id: 'ByteDance/Seedream-4', name: 'Seedream 4', provider: 'ByteDance', desc: 'Video generation model.', context: '8k', tags: ['Video'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        // Embedding Models (Note: Require /v1/embeddings endpoint)
+        { id: 'BAAI/bge-base-en-v1.5', name: 'BGE Base EN v1.5', provider: 'BAAI', desc: 'Base English embedding model.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'BAAI/bge-en-icl', name: 'BGE EN ICL', provider: 'BAAI', desc: 'In-context learning embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'BAAI/bge-large-en-v1.5', name: 'BGE Large EN v1.5', provider: 'BAAI', desc: 'Large English embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'BAAI/bge-m3', name: 'BGE M3', provider: 'BAAI', desc: 'Multilingual BGE embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'BAAI/bge-m3-multi', name: 'BGE M3 Multi', provider: 'BAAI', desc: 'Multi-task BGE embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'intfloat/e5-base-v2', name: 'E5 Base v2', provider: 'Intfloat', desc: 'E5 base embedding model.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'intfloat/e5-large-v2', name: 'E5 Large v2', provider: 'Intfloat', desc: 'E5 large embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'intfloat/multilingual-e5-large', name: 'E5 Large Multilingual', provider: 'Intfloat', desc: 'Multilingual E5 large.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'intfloat/multilingual-e5-large-instruct', name: 'E5 Large Instruct', provider: 'Intfloat', desc: 'Instruction-tuned E5.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'sentence-transformers/all-MiniLM-L12-v2', name: 'MiniLM L12 v2', provider: 'Sentence-Transformers', desc: 'MiniLM embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'sentence-transformers/all-MiniLM-L6-v2', name: 'MiniLM L6 v2', provider: 'Sentence-Transformers', desc: 'Compact MiniLM.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'sentence-transformers/all-mpnet-base-v2', name: 'MPNet Base v2', provider: 'Sentence-Transformers', desc: 'MPNet base embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'sentence-transformers/clip-ViT-B-32', name: 'CLIP ViT-B/32', provider: 'Sentence-Transformers', desc: 'CLIP vision embedding.', context: 'N/A', tags: ['Embedding', 'Vision'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'sentence-transformers/clip-ViT-B-32-multilingual-v1', name: 'CLIP Multilingual', provider: 'Sentence-Transformers', desc: 'Multilingual CLIP.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'sentence-transformers/multi-qa-mpnet-base-dot-v1', name: 'Multi-QA MPNet', provider: 'Sentence-Transformers', desc: 'QA-focused embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'sentence-transformers/paraphrase-MiniLM-L6-v2', name: 'Paraphrase MiniLM', provider: 'Sentence-Transformers', desc: 'Paraphrase embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'thenlper/gte-base', name: 'GTE Base', provider: 'Thenlper', desc: 'GTE base embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'thenlper/gte-large', name: 'GTE Large', provider: 'Thenlper', desc: 'GTE large embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'shibing624/text2vec-base-chinese', name: 'Text2Vec Chinese', provider: 'Shibing624', desc: 'Chinese text embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'google/embeddinggemma-300m', name: 'Embedding Gemma 300M', provider: 'Google', desc: 'Gemma embedding model.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'Qwen/Qwen3-Embedding-0.6B', name: 'Qwen3 Embedding 0.6B', provider: 'Qwen', desc: 'Qwen embedding 0.6B.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'Qwen/Qwen3-Embedding-0.6B-batch', name: 'Qwen3 Embedding Batch', provider: 'Qwen', desc: 'Batch Qwen embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Free Tier' },
+        { id: 'Qwen/Qwen3-Embedding-4B-batch', name: 'Qwen3 Embedding 4B', provider: 'Qwen', desc: 'Large Qwen embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        { id: 'Qwen/Qwen3-Embedding-8B', name: 'Qwen3 Embedding 8B', provider: 'Qwen', desc: 'Largest Qwen embedding.', context: 'N/A', tags: ['Embedding'], icon: <LayoutGrid size={24} />, tier: 'Pro Tier' },
+        // Image Generation Models (Note: Require /v1/images/generations endpoint)
+        { id: 'Bria/Bria-3.2', name: 'Bria 3.2', provider: 'Bria', desc: 'Bria image generation.', context: 'N/A', tags: ['Image Gen'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/Bria-3.2-vector', name: 'Bria 3.2 Vector', provider: 'Bria', desc: 'Vector image generation.', context: 'N/A', tags: ['Image Gen'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/blur_background', name: 'Bria Blur Background', provider: 'Bria', desc: 'Background blur tool.', context: 'N/A', tags: ['Image Edit'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/enhance', name: 'Bria Enhance', provider: 'Bria', desc: 'Image enhancement.', context: 'N/A', tags: ['Image Edit'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/erase', name: 'Bria Erase', provider: 'Bria', desc: 'Object removal tool.', context: 'N/A', tags: ['Image Edit'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/erase_foreground', name: 'Bria Erase Foreground', provider: 'Bria', desc: 'Foreground removal.', context: 'N/A', tags: ['Image Edit'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/expand', name: 'Bria Expand', provider: 'Bria', desc: 'Image expansion.', context: 'N/A', tags: ['Image Edit'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/fibo', name: 'Bria Fibo', provider: 'Bria', desc: 'Bria Fibo model.', context: 'N/A', tags: ['Image Gen'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/gen_fill', name: 'Bria Gen Fill', provider: 'Bria', desc: 'Generative fill tool.', context: 'N/A', tags: ['Image Edit'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/remove_background', name: 'Bria Remove BG', provider: 'Bria', desc: 'Background removal.', context: 'N/A', tags: ['Image Edit'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'Bria/replace_background', name: 'Bria Replace BG', provider: 'Bria', desc: 'Background replacement.', context: 'N/A', tags: ['Image Edit'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'black-forest-labs/FLUX-1-Redux-dev', name: 'FLUX Redux Dev', provider: 'BlackForest', desc: 'FLUX Redux model.', context: 'N/A', tags: ['Image Gen'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'black-forest-labs/FLUX-1.1-pro', name: 'FLUX 1.1 Pro', provider: 'BlackForest', desc: 'FLUX Pro generation.', context: 'N/A', tags: ['Image Gen'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'black-forest-labs/FLUX.1-Kontext-dev', name: 'FLUX Kontext Dev', provider: 'BlackForest', desc: 'Context-aware FLUX.', context: 'N/A', tags: ['Image Gen'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'black-forest-labs/FLUX.1-Kontext-pro', name: 'FLUX Kontext Pro', provider: 'BlackForest', desc: 'FLUX Kontext Pro.', context: 'N/A', tags: ['Image Gen'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'black-forest-labs/FLUX.1-Pro', name: 'FLUX 1 Pro', provider: 'BlackForest', desc: 'FLUX professional.', context: 'N/A', tags: ['Image Gen'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'black-forest-labs/FLUX.1-Turbo', name: 'FLUX 1 Turbo', provider: 'BlackForest', desc: 'Fast FLUX generation.', context: 'N/A', tags: ['Image Gen', 'Fast'], icon: <Image size={24} />, tier: 'Pro Tier' },
+        { id: 'stabilityai/sdxl-turbo', name: 'SDXL Turbo', provider: 'StabilityAI', desc: 'Fast SDXL generation.', context: 'N/A', tags: ['Image Gen', 'Fast'], icon: <Image size={24} />, tier: 'Pro Tier' }
     ];
 
-    const providers = ['All Providers', 'DeepSeek', 'xAI', 'Qwen', 'GPT-OSS', 'Anthropic', 'OpenAI', 'Google', 'Meta', 'Mistral', 'Nvidia', 'NousResearch', 'Moonshot', 'Microsoft', 'Gryphe', 'Sao10K', 'ZhipuAI', 'MiniMaxAI', 'OpenAI-OSS', 'PaddlePaddle', 'AllenAI', 'ByteDance'];
+    const providers = ['All Providers', 'DeepSeek', 'xAI', 'Qwen', 'GPT-OSS', 'Anthropic', 'OpenAI', 'Google', 'Meta', 'Mistral', 'Nvidia', 'NousResearch', 'Moonshot', 'Microsoft', 'Gryphe', 'Sao10K', 'ZhipuAI', 'MiniMaxAI', 'OpenAI-OSS', 'PaddlePaddle', 'AllenAI', 'ByteDance', 'BAAI', 'Intfloat', 'Sentence-Transformers', 'Thenlper', 'Shibing624', 'Bria', 'BlackForest', 'StabilityAI'];
 
     // Fetch uptime data from Firestore
     useEffect(() => {
