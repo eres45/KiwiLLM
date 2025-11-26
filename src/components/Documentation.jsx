@@ -309,19 +309,6 @@ Authorization: Bearer kiwi-your-api-key-here`;
                             </div>
                         </div>
 
-                        <h2>DarkAI Example</h2>
-                        <p>Example of using the specialized DarkAI coding model.</p>
-                        <CodeBlock code={`curl https://kiwillm.onrender.com/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer kiwi-your-api-key-here" \\
-  -d '{
-    "model": "dark-code-76",
-    "messages": [
-      {"role": "system", "content": "You are an expert coding assistant."},
-      {"role": "user", "content": "Write a Python function to calculate Fibonacci numbers."}
-    ]
-  }'`} language="bash" />
-
                         <h2>Automatic Failover</h2>
                         <p>If a provider is temporarily unavailable, requests will fail with an appropriate error message. You can retry with a different model or wait for the service to recover.</p>
 
