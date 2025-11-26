@@ -361,107 +361,107 @@ const Models = () => {
         // DeepInfra Models (Top Selections)
         {
             id: 'deepseek-ai/DeepSeek-V3.1',
-            name: 'DeepSeek V3.1 (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'DeepSeek V3.1',
+            provider: 'DeepSeek',
             desc: 'Most capable DeepSeek model via DeepInfra infrastructure.',
             context: '128k',
-            tags: ['SOTA', 'DeepInfra'],
+            tags: ['SOTA'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'deepseek-ai/DeepSeek-R1',
-            name: 'DeepSeek R1 (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'DeepSeek R1',
+            provider: 'DeepSeek',
             desc: 'Advanced reasoning model with chain-of-thought capabilities.',
             context: '128k',
-            tags: ['Reasoning', 'DeepInfra'],
+            tags: ['Reasoning'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'Qwen/Qwen3-235B-A22B-Thinking-2507',
-            name: 'Qwen3 235B Thinking (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Qwen3 235B Thinking',
+            provider: 'Qwen',
             desc: 'Massive Qwen model with advanced reasoning capabilities.',
             context: '128k',
-            tags: ['Reasoning', 'SOTA', 'DeepInfra'],
+            tags: ['Reasoning', 'SOTA'],
             icon: <MessageSquare size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'meta-llama/Meta-Llama-3.1-70B-Instruct',
-            name: 'Llama 3.1 70B (DeepInfra)',
-            provider: 'DeepInfra',
-            desc: 'Meta\'s flagship open-source model via DeepInfra.',
+            name: 'Llama 3.1 70B',
+            provider: 'Meta',
+            desc: 'Meta\'s flagship open-source model.',
             context: '128k',
-            tags: ['Open Source', 'DeepInfra'],
+            tags: ['Open Source'],
             icon: <Box size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'anthropic/claude-4-sonnet',
-            name: 'Claude 4 Sonnet (DeepInfra)',
-            provider: 'DeepInfra',
-            desc: 'Anthropic\'s latest Claude model via DeepInfra.',
+            name: 'Claude 4 Sonnet',
+            provider: 'Anthropic',
+            desc: 'Anthropic\'s latest Claude model.',
             context: '200k',
-            tags: ['SOTA', 'DeepInfra'],
+            tags: ['SOTA'],
             icon: <Sparkles size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'Qwen/Qwen3-Coder-480B-A35B-Instruct',
-            name: 'Qwen3 Coder 480B (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Qwen3 Coder 480B',
+            provider: 'Qwen',
             desc: 'World\'s most powerful open coding model.',
             context: '128k',
-            tags: ['Coding', 'SOTA', 'DeepInfra'],
+            tags: ['Coding', 'SOTA'],
             icon: <Code size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'google/gemini-2.5-flash',
-            name: 'Gemini 2.5 Flash (DeepInfra)',
-            provider: 'DeepInfra',
-            desc: 'Google\'s fast Gemini model via DeepInfra infrastructure.',
+            name: 'Gemini 2.5 Flash',
+            provider: 'Google',
+            desc: 'Google\'s fast Gemini model.',
             context: '1m',
-            tags: ['Fast', 'DeepInfra'],
+            tags: ['Fast'],
             icon: <Zap size={24} />,
             tier: 'Free Tier'
         },
         {
             id: 'nvidia/Llama-3.1-Nemotron-70B-Instruct',
-            name: 'Nemotron 70B (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Nemotron 70B',
+            provider: 'Nvidia',
             desc: 'NVIDIA\'s enhanced Llama model for superior performance.',
             context: '128k',
-            tags: ['Enhanced', 'DeepInfra'],
+            tags: ['Enhanced'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'mistralai/Mistral-Small-3.2-24B-Instruct-2506',
-            name: 'Mistral Small 3.2 (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Mistral Small 3.2',
+            provider: 'Mistral',
             desc: 'Efficient Mistral model for balanced performance.',
             context: '128k',
-            tags: ['Efficient', 'DeepInfra'],
+            tags: ['Efficient'],
             icon: <Sparkles size={24} />,
             tier: 'Pro Tier'
         },
         {
             id: 'NousResearch/Hermes-3-Llama-3.1-405B',
-            name: 'Hermes 3 405B (DeepInfra)',
-            provider: 'DeepInfra',
+            name: 'Hermes 3 405B',
+            provider: 'NousResearch',
             desc: 'Largest open-source model with exceptional capabilities.',
             context: '128k',
-            tags: ['SOTA', 'Open Source', 'DeepInfra'],
+            tags: ['SOTA', 'Open Source'],
             icon: <Cpu size={24} />,
             tier: 'Pro Tier'
         }
     ];
 
-    const providers = ['All Providers', 'DeepSeek', 'xAI', 'Qwen', 'GPT-OSS', 'Anthropic', 'OpenAI', 'Google', 'Meta', 'Mistral', 'DeepInfra'];
+    const providers = ['All Providers', 'DeepSeek', 'xAI', 'Qwen', 'GPT-OSS', 'Anthropic', 'OpenAI', 'Google', 'Meta', 'Mistral', 'Nvidia', 'NousResearch'];
 
     // Fetch uptime data from Firestore
     useEffect(() => {
