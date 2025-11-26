@@ -29,7 +29,7 @@ const FloatingIcons = () => {
         <section className="floating-icons-section">
             <div className="floating-text">
                 <p>
-                    MegaLLM is the unified interface for the AI era,<br />
+                    KiwiLLM is the unified interface for the AI era,<br />
                     evolving how developers integrate intelligence into their applications.
                 </p>
             </div>

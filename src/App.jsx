@@ -14,6 +14,7 @@ import Pricing from './components/Pricing';
 import ApiKeys from './components/ApiKeys';
 import Playground from './components/Playground';
 import Models from './components/Models';
+import Testimonials from './components/Testimonials';
 
 import { AuthProvider } from './contexts/AuthContext';
 import Login from './components/Login';
@@ -28,9 +29,9 @@ function App() {
     window.scrollTo(0, 0);
   };
 
-  // Disable body scroll on non-homepage pages
+  // Disable body scroll on non-homepage pages (except dashboard and api-keys which need scrolling)
   useEffect(() => {
-    if (currentPage !== 'landing') {
+    if (currentPage !== 'landing' && currentPage !== 'dashboard' && currentPage !== 'api-keys') {
       document.body.classList.add('no-scroll');
     } else {
       document.body.classList.remove('no-scroll');
@@ -77,6 +78,7 @@ function App() {
             <FloatingIcons />
             <Features />
             <Infrastructure />
+            <Testimonials />
             <CTA />
             <FAQ />
             <Footer onNavigate={navigateTo} />

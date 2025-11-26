@@ -11,7 +11,7 @@ const CTA = () => {
 
             <div className="cta-content">
                 <h2>Start Building with<br />70+ AI Models Today</h2>
-                <p>Join thousands of developers using MegaLLM<br />to ship AI features faster and cheaper.</p>
+                <p>Join thousands of developers using KiwiLLM<br />to ship AI features faster and cheaper.</p>
 
                 <div className="cta-actions">
                     <button className="btn btn-light">

@@ -80,7 +80,7 @@ const CodeBlock = () => {
                     <code>
                         <span className="keyword">from</span> openai <span className="keyword">import</span> OpenAI{'\n\n'}
                         client = <span className="function">OpenAI</span>({'(\n'}
-                        {'    '}base_url=<span className="string">"https://ai.megallm.io/v1"</span>,{'\n'}
+                        {'    '}base_url=<span className="string">"https://kiwillm.onrender.com/v1"</span>,{'\n'}
                         {'    '}api_key=<span className="string">"your-api-key"</span>{'\n'}
                         ){'\n\n'}
                         response = client.chat.completions.<span className="function">create</span>({'(\n'}

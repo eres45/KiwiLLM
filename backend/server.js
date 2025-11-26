@@ -131,18 +131,43 @@ app.get('/v1/check-key', validateKey, (req, res) => {
     res.json({ valid: true, user: req.user });
 });
 
+// --- Usage Tracking Helper ---
+async function trackUsage(userId, model, promptTokens, completionTokens, success = true, error = null) {
+    try {
+        const userRef = db.collection('users').doc(userId);
+        const totalTokens = promptTokens + completionTokens;
+
+        // Update aggregated stats
+        await userRef.set({
+            stats: {
+                totalRequests: admin.firestore.FieldValue.increment(1),
+                successfulRequests: admin.firestore.FieldValue.increment(success ? 1 : 0),
+                failedRequests: admin.firestore.FieldValue.increment(success ? 0 : 1),
+                totalTokens: admin.firestore.FieldValue.increment(totalTokens),
+                inputTokens: admin.firestore.FieldValue.increment(promptTokens),
+                outputTokens: admin.firestore.FieldValue.increment(completionTokens),
+                lastUsed: new Date().toISOString(),
+                [`modelUsage.${model}.requests`]: admin.firestore.FieldValue.increment(1),
+                [`modelUsage.${model}.tokens`]: admin.firestore.FieldValue.increment(totalTokens),
+                [`modelUsage.${model}.lastUsed`]: new Date().toISOString()
+            }
+        }, { merge: true });
+    } catch (err) {
+        console.error('Failed to track usage:', err);
+    }
+}
+
+// Helper to estimate tokens from text (roughly 1 token = 4 characters)
+function estimateTokens(text) {
+    if (!text) return 0;
+    return Math.ceil(text.length / 4);
+}
+
 // --- Chat Completions Endpoint ---
 app.post('/v1/chat/completions', validateKey, async (req, res) => {
     const { model, messages } = req.body;
 
     try {
-        // Log usage
-        const userRef = db.collection('users').doc(req.user.userId);
-        userRef.update({
-            'stats.requests': admin.firestore.FieldValue.increment(1),
-            'stats.lastUsed': new Date().toISOString()
-        }).catch(err => console.error('Failed to update stats:', err));
-
         // Check if Custom Model
         if (CUSTOM_MODELS[model]) {
             const config = CUSTOM_MODELS[model];
@@ -177,6 +202,13 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                 content = text;
             }
 
+            // Estimate tokens for custom models
+            const promptTokens = estimateTokens(prompt);
+            const completionTokens = estimateTokens(content);
+
+            // Track usage
+            await trackUsage(req.user.userId, model, promptTokens, completionTokens, true);
+
             // Return in OpenAI format
             return res.json({
                 id: `chatcmpl-${Date.now()}`,
@@ -188,7 +220,11 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                     message: { role: 'assistant', content: content },
                     finish_reason: 'stop'
                 }],
-                usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
+                usage: {
+                    prompt_tokens: promptTokens,
+                    completion_tokens: completionTokens,
+                    total_tokens: promptTokens + completionTokens
+                }
             });
         }
 
@@ -214,6 +250,10 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
 
     } catch (error) {
         console.error('Proxy Error:', error);
+
+        // Track failed request
+        await trackUsage(req.user.userId, model, 0, 0, false, error.message);
+
         if (!res.headersSent) {
             res.status(500).json({ error: 'Upstream Provider Error', details: error.message });
         }

@@ -8,15 +8,15 @@ const Hero = ({ onNavigate }) => {
             <div className="hero-content">
                 <h1>Access 70+ LLMs<br />with One API Key</h1>
                 <p className="hero-subtitle">
-                    Ship AI features faster with MegaLLM’s unified gateway. Access Claude, GPT-5, Gemini, Llama, and 70+ models through a single API. Built-in analytics, smart fallbacks, and usage tracking included.
+                    Ship AI features faster with KiwiLLM’s unified gateway. Access Claude, GPT-5, Gemini, Llama, and 70+ models through a single API. Built-in analytics, smart fallbacks, and usage tracking included.
                 </p>
 
                 <div className="hero-actions">
-                    <button className="btn btn-light" onClick={() => onNavigate('dashboard')}>
+                    <button className="btn-hero-primary" onClick={() => onNavigate('dashboard')}>
                         <Layers size={18} fill="black" />
                         Start Free Trial
                     </button>
-                    <button className="btn btn-dark-outline" onClick={() => onNavigate('rankings')}>
+                    <button className="btn-hero-secondary" onClick={() => onNavigate('rankings')}>
                         <Bot size={18} />
                         View Models
                     </button>

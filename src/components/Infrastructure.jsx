@@ -13,7 +13,7 @@ const Infrastructure = () => {
                 <div className="infra-content">
                     <h2>Enterprise-Grade<br />Infrastructure<br />for AI at Scale</h2>
                     <p className="infra-description">
-                        MegaLLM handles billions of tokens daily with sub-100ms overhead. Our globally distributed infrastructure ensures your AI applications run fast, secure, and reliable.
+                        KiwiLLM handles billions of tokens daily with sub-100ms overhead. Our globally distributed infrastructure ensures your AI applications run fast, secure, and reliable.
                     </p>
 
                     <div className="infra-features">
@@ -45,7 +45,7 @@ const Infrastructure = () => {
                                 <span>5,000</span>
                             </div>
                             <div className="rack-label">
-                                MEGALLM<br />AI ENGINE
+                                KIWILLM<br />AI ENGINE
                             </div>
                         </div>
 

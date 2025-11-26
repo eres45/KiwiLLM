@@ -5,35 +5,51 @@ import {
     ExternalLink, Coffee, User
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const Dashboard = ({ onNavigate }) => {
     const { currentUser, logout } = useAuth();
     const [userData, setUserData] = useState(null);
+    const [apiKeys, setApiKeys] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        let isMounted = true;
-        async function fetchUserData() {
-            if (currentUser) {
-                try {
-                    const docRef = doc(db, "users", currentUser.uid);
-                    const docSnap = await getDoc(docRef);
-                    if (isMounted && docSnap.exists()) {
+        let unsubscribe = null;
+
+        async function fetchData() {
+            if (!currentUser) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                // Set up real-time listener for user stats
+                const userRef = doc(db, "users", currentUser.uid);
+                unsubscribe = onSnapshot(userRef, (docSnap) => {
+                    if (docSnap.exists()) {
                         setUserData(docSnap.data());
+                    } else {
+                        setUserData({});
                     }
-                } catch (error) {
-                    console.error("Error fetching user data:", error);
-                } finally {
-                    if (isMounted) setLoading(false);
-                }
-            } else {
-                if (isMounted) setLoading(false);
+                });
+
+                // Fetch API keys
+                const keysQuery = query(collection(db, "api_keys"), where("userId", "==", currentUser.uid));
+                const keysSnapshot = await getDocs(keysQuery);
+                setApiKeys(keysSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                setLoading(false);
             }
         }
-        fetchUserData();
-        return () => { isMounted = false; };
+
+        fetchData();
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
     }, [currentUser]);
 
     const handleLogout = async () => {
@@ -46,6 +62,25 @@ const Dashboard = ({ onNavigate }) => {
     };
 
     if (loading) return <div className="dashboard-container"><p>Loading...</p></div>;
+
+    // Extract stats with defaults
+    const stats = userData?.stats || {};
+    const totalRequests = stats.totalRequests || 0;
+    const successfulRequests = stats.successfulRequests || 0;
+    const failedRequests = stats.failedRequests || 0;
+    const totalTokens = stats.totalTokens || 0;
+    const inputTokens = stats.inputTokens || 0;
+    const outputTokens = stats.outputTokens || 0;
+    const successRate = totalRequests > 0 ? ((successfulRequests / totalRequests) * 100).toFixed(1) : 0;
+
+    // Extract model usage
+    const modelUsage = stats.modelUsage || {};
+    const sortedModels = Object.entries(modelUsage)
+        .sort((a, b) => (b[1].requests || 0) - (a[1].requests || 0))
+        .slice(0, 5);
+
+    // Get first API key
+    const primaryKey = apiKeys[0];
 
     return (
         <div className="dashboard-container">
@@ -70,15 +105,17 @@ const Dashboard = ({ onNavigate }) => {
                         <div className="overview-grid">
                             <div className="overview-item">
                                 <label>Service</label>
-                                <div className="value">A4F API Services</div>
+                                <div className="value">KiwiLLM API Services</div>
                             </div>
                             <div className="overview-item">
                                 <label>Key Status</label>
-                                <div className="status-badge active"><CheckCircle size={12} /> Active</div>
+                                <div className="status-badge active">
+                                    <CheckCircle size={12} /> {apiKeys.length > 0 ? 'Active' : 'No Keys'}
+                                </div>
                             </div>
                             <div className="overview-item">
                                 <label>Current Plan</label>
-                                <div className="plan-badge">Free</div>
+                                <div className="plan-badge">{userData?.plan || 'Free'}</div>
                             </div>
                             <div className="overview-item">
                                 <label>Plan Validity</label>
@@ -98,58 +135,49 @@ const Dashboard = ({ onNavigate }) => {
                         <div className="stats-grid">
                             <div className="stat-item">
                                 <label><Activity size={12} /> Total Requests</label>
-                                <div className="stat-value">14</div>
+                                <div className="stat-value">{totalRequests}</div>
                             </div>
                             <div className="stat-item">
-                                <label><MessageSquare size={12} /> Chat (Non-Stream)</label>
-                                <div className="stat-value">0</div>
+                                <label><CheckCircle size={12} /> Successful</label>
+                                <div className="stat-value">{successfulRequests}</div>
                             </div>
                             <div className="stat-item">
-                                <label><MessageSquare size={12} /> Chat (Stream)</label>
-                                <div className="stat-value">14</div>
+                                <label><MessageSquare size={12} /> Failed</label>
+                                <div className="stat-value">{failedRequests}</div>
                             </div>
                             <div className="stat-item">
-                                <label><Image size={12} /> Images Generated</label>
-                                <div className="stat-value">0</div>
+                                <label><Image size={12} /> Success Rate</label>
+                                <div className="stat-value">{successRate}%</div>
                             </div>
                             <div className="stat-item">
                                 <label><Activity size={12} /> Total Tokens</label>
-                                <div className="stat-value">745</div>
+                                <div className="stat-value">{totalTokens.toLocaleString()}</div>
                             </div>
                             <div className="stat-item">
-                                <label><CheckCircle size={12} /> Success Rate</label>
-                                <div className="stat-value">50.0%</div>
+                                <label><CheckCircle size={12} /> Avg Tokens/Req</label>
+                                <div className="stat-value">{totalRequests > 0 ? Math.floor(totalTokens / totalRequests) : 0}</div>
                             </div>
                         </div>
 
                         <div className="token-stats">
                             <div className="token-item">
                                 <label>Input Tokens</label>
-                                <div className="token-value">581</div>
+                                <div className="token-value">{inputTokens.toLocaleString()}</div>
                             </div>
                             <div className="token-item">
                                 <label>Output Tokens</label>
-                                <div className="token-value">164</div>
+                                <div className="token-value">{outputTokens.toLocaleString()}</div>
                             </div>
                         </div>
 
                         <div className="usage-bars">
                             <div className="usage-bar-container">
                                 <div className="bar-label">
-                                    <span>Requests Per Minute (RPM)</span>
-                                    <span>0 / 5</span>
+                                    <span>API Usage Status</span>
+                                    <span>{totalRequests} total requests</span>
                                 </div>
                                 <div className="progress-bg">
-                                    <div className="progress-fill" style={{ width: '0%' }}></div>
-                                </div>
-                            </div>
-                            <div className="usage-bar-container">
-                                <div className="bar-label">
-                                    <span>Requests Per Day (RPD)</span>
-                                    <span>0 / 300</span>
-                                </div>
-                                <div className="progress-bg">
-                                    <div className="progress-fill" style={{ width: '0%' }}></div>
+                                    <div className="progress-fill" style={{ width: '100%' }}></div>
                                 </div>
                             </div>
                         </div>
@@ -161,62 +189,33 @@ const Dashboard = ({ onNavigate }) => {
                             <Activity size={16} className="icon-blue" />
                             <h3>Model Usage</h3>
                         </div>
-                        <p className="card-subtitle">Your most frequently used models (by last used date)</p>
+                        <p className="card-subtitle">Your most frequently used models</p>
 
                         <div className="model-list">
-                            <div className="model-item">
-                                <div className="model-info">
-                                    <span className="model-name">provider-3/deepseek-v3</span>
-                                    <span className="model-meta">1/1 reqs <span className="cost">$0.000012</span></span>
-                                </div>
-                                <div className="model-bar-bg">
-                                    <div className="model-bar-fill" style={{ width: '100%' }}></div>
-                                </div>
-                            </div>
+                            {sortedModels.length > 0 ? (
+                                sortedModels.map(([modelName, data]) => {
+                                    const maxRequests = sortedModels[0][1].requests || 1;
+                                    const percentage = ((data.requests || 0) / maxRequests) * 100;
 
-                            <div className="model-item">
-                                <div className="model-info">
-                                    <span className="model-name">provider-4/claude-3.7-sonnet</span>
-                                    <span className="model-meta">3/3 reqs <span className="cost">$0.001563</span></span>
-                                </div>
-                                <div className="model-bar-bg">
-                                    <div className="model-bar-fill" style={{ width: '100%' }}></div>
-                                </div>
-                            </div>
-
-                            <div className="model-item">
-                                <div className="model-info">
-                                    <span className="model-name">provider-1/gpt-4.1-2025-04-14</span>
-                                    <span className="model-meta">0/1 reqs <span className="cost">$0</span></span>
-                                </div>
-                                <div className="model-bar-bg">
-                                    <div className="model-bar-fill" style={{ width: '0%' }}></div>
-                                </div>
-                            </div>
-
-                            <div className="model-item">
-                                <div className="model-info">
-                                    <span className="model-name">provider-2/llama-4-maverick</span>
-                                    <span className="model-meta">1/1 reqs <span className="cost">$0.000071</span></span>
-                                </div>
-                                <div className="model-bar-bg">
-                                    <div className="model-bar-fill" style={{ width: '100%' }}></div>
-                                </div>
-                            </div>
-
-                            <div className="model-item">
-                                <div className="model-info">
-                                    <span className="model-name">provider-4/gpt-4.1-mini</span>
-                                    <span className="model-meta">1/1 reqs <span className="cost">$0.000062</span></span>
-                                </div>
-                                <div className="model-bar-bg">
-                                    <div className="model-bar-fill" style={{ width: '100%' }}></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="show-more">
-                            Show 1 More
+                                    return (
+                                        <div className="model-item" key={modelName}>
+                                            <div className="model-info">
+                                                <span className="model-name">{modelName}</span>
+                                                <span className="model-meta">
+                                                    {data.requests || 0} reqs • {(data.tokens || 0).toLocaleString()} tokens
+                                                </span>
+                                            </div>
+                                            <div className="model-bar-bg">
+                                                <div className="model-bar-fill" style={{ width: `${percentage}%` }}></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>
+                                    No model usage yet. Start using the API to see stats here.
+                                </p>
+                            )}
                         </div>
                     </section>
                 </div>
@@ -240,8 +239,8 @@ const Dashboard = ({ onNavigate }) => {
                                 <span>{userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'N/A'}</span>
                             </div>
                             <div className="detail-row">
-                                <span><CreditCard size={12} /> Total Payments:</span>
-                                <span>$0.00</span>
+                                <span><Activity size={12} /> Total Requests:</span>
+                                <span>{totalRequests}</span>
                             </div>
                             <div className="detail-row">
                                 <span><Clock size={12} /> Current Plan:</span>
@@ -265,49 +264,59 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                         <p className="card-subtitle">Information about your active API key</p>
 
-                        <div className="key-details">
-                            <div className="key-row">
-                                <label>Name</label>
-                                <div className="value">ai</div>
-                            </div>
-                            <div className="key-row">
-                                <label>Key Preview</label>
-                                <div className="key-badge">ddc-••••6837</div>
-                            </div>
-                            <div className="key-row">
-                                <label>Created</label>
-                                <div className="value">6 months ago</div>
-                            </div>
-                            <div className="key-row">
-                                <label>Last Used</label>
-                                <div className="value">4 months ago</div>
-                            </div>
-                            <div className="key-row">
-                                <label>Status</label>
-                                <div className="status-badge active"><CheckCircle size={12} /> Active</div>
-                            </div>
-                        </div>
-
-                        <button className="btn-outline-full" onClick={() => onNavigate('api-keys')}>
-                            Manage API Key
-                        </button>
+                        {primaryKey ? (
+                            <>
+                                <div className="key-details">
+                                    <div className="key-row">
+                                        <label>Name</label>
+                                        <div className="value">{primaryKey.name || 'Unnamed'}</div>
+                                    </div>
+                                    <div className="key-row">
+                                        <label>Key Preview</label>
+                                        <div className="key-badge">{primaryKey.key?.substring(0, 8)}••••{primaryKey.key?.slice(-4)}</div>
+                                    </div>
+                                    <div className="key-row">
+                                        <label>Created</label>
+                                        <div className="value">{primaryKey.createdAt ? new Date(primaryKey.createdAt).toLocaleDateString() : 'N/A'}</div>
+                                    </div>
+                                    <div className="key-row">
+                                        <label>Status</label>
+                                        <div className={`status-badge ${primaryKey.status === 'Active' ? 'active' : ''}`}>
+                                            <CheckCircle size={12} /> {primaryKey.status || 'Active'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button className="btn-outline-full" onClick={() => onNavigate('api-keys')}>
+                                    Manage API Key
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>
+                                    No API keys yet. Create one to get started.
+                                </p>
+                                <button className="btn-outline-full" onClick={() => onNavigate('api-keys')}>
+                                    Create API Key
+                                </button>
+                            </>
+                        )}
                     </section>
 
                     {/* Usage Cost */}
                     <section className="dashboard-card">
                         <div className="card-header">
                             <CreditCard size={16} className="icon-blue" />
-                            <h3>Usage Cost</h3>
+                            <h3>Usage Overview</h3>
                         </div>
-                        <p className="card-subtitle">Current estimated costs</p>
+                        <p className="card-subtitle">Current usage metrics</p>
 
                         <div className="cost-display">
-                            <label>Estimated Cost (USD)</label>
-                            <div className="cost-value">$0.001742</div>
+                            <label>Total Tokens Used</label>
+                            <div className="cost-value">{totalTokens.toLocaleString()}</div>
                         </div>
 
                         <div className="plan-info-box">
-                            free Plan - Unlimited
+                            {userData?.plan || 'Free'} Plan - Unlimited Requests
                         </div>
 
                         <a href="#" className="link-blue" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }}>

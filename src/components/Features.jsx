@@ -8,7 +8,7 @@ const Features = () => {
                 <h2>Built for<br />developers<br />who ship</h2>
                 <div className="features-intro">
                     <p>
-                        MegaLLM is shaped by the practices and principles that distinguish world-class development teams from the rest: relentless focus, fast execution, and a commitment to the quality of craft.
+                        KiwiLLM is shaped by the practices and principles that distinguish world-class development teams from the rest: relentless focus, fast execution, and a commitment to the quality of craft.
                     </p>
                     <a href="#" className="explore-link">
                         Explore the platform <ArrowRight size={16} />

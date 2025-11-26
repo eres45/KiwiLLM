@@ -34,7 +34,7 @@ const FAQ = () => {
     const faqs = [
         {
             id: '001',
-            question: "How does MegaLLM pricing work?",
+            question: "How does KiwiLLM pricing work?",
             answer: "Pay only for what you use with transparent per-token pricing. We add a small markup (typically 10-20%) on top of provider costs to cover infrastructure and features. No monthly fees, no minimums. Volume discounts available for enterprise usage with over 10M tokens per month."
         },
         {

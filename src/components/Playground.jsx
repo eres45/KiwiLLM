@@ -66,7 +66,7 @@ const Playground = () => {
             });
 
             if (response.ok) {
-                localStorage.setItem('megallm_api_key', apiKey);
+                localStorage.setItem('kiwillm_api_key', apiKey);
                 setShowModal(false);
                 setView('chat');
             } else {
@@ -94,7 +94,7 @@ const Playground = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('megallm_api_key')}`
+                    'Authorization': `Bearer ${localStorage.getItem('kiwillm_api_key')}`
                 },
                 body: JSON.stringify({
                     model: selectedModel,
@@ -276,7 +276,7 @@ const Playground = () => {
                     }}>
                         <div style={{ background: '#18181b', padding: '2rem', borderRadius: '12px', width: '400px', border: '1px solid #27272a' }}>
                             <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Enter API Key</h3>
-                            <p style={{ color: '#a1a1aa', marginBottom: '1.5rem' }}>Please enter your MegaLLM API key to access the playground.</p>
+                            <p style={{ color: '#a1a1aa', marginBottom: '1.5rem' }}>Please enter your KiwiLLM API key to access the playground.</p>
                             <input
                                 type="text"
                                 value={apiKey}

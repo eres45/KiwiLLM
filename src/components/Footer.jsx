@@ -25,11 +25,11 @@ const Footer = ({ onNavigate }) => {
             </div>
 
             <div className="footer-main">
-                <h1 className="mega-text">MegaLLM</h1>
+                <h1 className="mega-text">KiwiLLM</h1>
             </div>
 
             <div className="footer-bottom">
-                <div className="footer-logo">MegaLLM</div>
+                <div className="footer-logo">KiwiLLM</div>
                 <div className="footer-legal">
                     <a href="#">About</a>
                     <a href="#">Products</a>

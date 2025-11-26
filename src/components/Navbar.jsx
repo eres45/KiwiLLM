@@ -41,7 +41,7 @@ const Navbar = ({ onNavigate }) => {
             <div className="nav-container">
                 <div className="nav-logo" onClick={() => handleNavigate('landing')}>
                     <Hexagon size={32} className="logo-icon" />
-                    <span className="logo-text">MegaLLM</span>
+                    <span className="logo-text">KiwiLLM</span>
                 </div>
 
                 {/* Desktop Menu */}
@@ -87,8 +87,8 @@ const Navbar = ({ onNavigate }) => {
                         </div>
                     ) : (
                         <>
-                            <button className="btn-text" onClick={() => handleNavigate('login')}>Log In</button>
-                            <button className="btn-primary" onClick={() => handleNavigate('signup')}>Sign Up</button>
+                            <button className="btn-nav-login" onClick={() => handleNavigate('login')}>Log In</button>
+                            <button className="btn-nav-signup" onClick={() => handleNavigate('signup')}>Sign Up</button>
                         </>
                     )}
                 </div>
@@ -115,8 +115,8 @@ const Navbar = ({ onNavigate }) => {
                             </>
                         ) : (
                             <>
-                                <button className="btn-text" onClick={() => handleNavigate('login')}>Log In</button>
-                                <button className="btn-primary" onClick={() => handleNavigate('signup')}>Sign Up</button>
+                                <button className="btn-nav-login" onClick={() => handleNavigate('login')}>Log In</button>
+                                <button className="btn-nav-signup" onClick={() => handleNavigate('signup')}>Sign Up</button>
                             </>
                         )}
                     </div>

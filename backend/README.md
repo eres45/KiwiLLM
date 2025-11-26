@@ -1,6 +1,6 @@
-# MegaLLM Backend - Render Deployment
+# KiwiLLM Backend - Render Deployment
 
-Backend API Gateway for MegaLLM, deployed on Render.
+Backend API Gateway for KiwiLLM, deployed on Render.
 
 ## 🚀 Quick Deploy to Render
 
