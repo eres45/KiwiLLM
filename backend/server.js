@@ -366,135 +366,178 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                 });
             }
 
-            // Forward request to AgentRouter
-            const completion = await agentrouter.chat.completions.create({
-                model: model,
-                messages: messages,
-                temperature: req.body.temperature,
-                max_tokens: req.body.max_tokens,
-                top_p: req.body.top_p,
-                stream: req.body.stream || false
-            });
-
-            // If streaming
-            if (req.body.stream) {
-                res.setHeader('Content-Type', 'text/event-stream');
-                res.setHeader('Cache-Control', 'no-cache');
-                res.setHeader('Connection', 'keep-alive');
-
-                for await (const chunk of completion) {
-                    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-                }
-                res.write('data: [DONE]\n\n');
-                res.end();
-
-                // Track usage (estimate for streaming)
-
-                // Simple prompt construction from messages - only use the last user message for better compatibility
-                const lastUserMessage = messages.filter(m => m.role === 'user').pop();
-                const prompt = lastUserMessage ? lastUserMessage.content : messages.map(m => m.content).join('\n');
-
-                // Build form data for POST request
-                const formData = new URLSearchParams();
-                formData.append(config.param, prompt);
-
-                // Add extra parameters if needed
-                if (config.extra) {
-                    Object.entries(config.extra).forEach(([k, v]) => formData.append(k, v));
-                }
-
-                // Use POST instead of GET to avoid URL length limits (414 errors)
-                const response = await fetch(config.url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData.toString()
+            try {
+                // Forward request to AgentRouter
+                const completion = await agentrouter.chat.completions.create({
+                    model: model,
+                    messages: messages,
+                    temperature: req.body.temperature,
+                    max_tokens: req.body.max_tokens,
+                    top_p: req.body.top_p,
+                    stream: req.body.stream || false
                 });
 
-                const text = await response.text();
+                // If streaming
+                if (req.body.stream) {
+                    res.setHeader('Content-Type', 'text/event-stream');
+                    res.setHeader('Cache-Control', 'no-cache');
+                    res.setHeader('Connection', 'keep-alive');
 
-                // Try to parse JSON response and extract the 'response' field
-                let content = text;
-                try {
-                    const jsonData = JSON.parse(text);
-                    if (jsonData.response) {
-                        content = jsonData.response;
-                    } else if (jsonData.error) {
-                        // If API returns an error
-                        throw new Error(`Upstream API error: ${jsonData.error}`);
+                    try {
+                        for await (const chunk of completion) {
+                            res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+                        }
+                        res.write('data: [DONE]\n\n');
+                        res.end();
+                    } catch (streamError) {
+                        console.error('Streaming error:', streamError);
+                        if (!res.headersSent) {
+                            res.status(500).json({
+                                error: 'Error during streaming',
+                                details: streamError.message
+                            });
+                        }
                     }
-                } catch (e) {
-                    // If not JSON, check if it's HTML (error page)
-                    if (text.trim().startsWith('<') || text.trim().startsWith('<!')) {
-                        throw new Error('Upstream API returned an error page. The model might be unavailable.');
-                    }
-                    // Use the raw text
-                    content = text;
+
+                    // Track usage (estimate for streaming)
+                    const estimatedPromptTokens = estimateTokens(messages.map(m => m.content).join(' '));
+                    await trackUsage(req.user.userId, model, estimatedPromptTokens, 0, true);
+                    return;
                 }
 
-                // CRITICAL: Validate that content is not empty
-                if (!content || content.trim() === '') {
-                    throw new Error(`Model ${model} returned an empty response. The upstream API might not support this model or is experiencing issues.`);
+                // Non-streaming response - validate response structure
+                if (!completion || !completion.choices || !completion.choices[0]) {
+                    throw new Error('Invalid response structure from AgentRouter API');
                 }
-
-                // Estimate tokens for custom models
-                const promptTokens = estimateTokens(prompt);
-                const completionTokens = estimateTokens(content);
 
                 // Track usage
-                await trackUsage(req.user.userId, model, promptTokens, completionTokens, true);
+                const usage = completion.usage || {};
+                await trackUsage(req.user.userId, model, usage.prompt_tokens || 0, usage.completion_tokens || 0, true);
 
-                // Return in OpenAI format
-                return res.json({
-                    id: `chatcmpl-${Date.now()}`,
-                    object: 'chat.completion',
-                    created: Math.floor(Date.now() / 1000),
-                    model: model,
-                    choices: [{
-                        index: 0,
-                        message: { role: 'assistant', content: content },
-                        finish_reason: 'stop'
-                    }],
-                    usage: {
-                        prompt_tokens: promptTokens,
-                        completion_tokens: completionTokens,
-                        total_tokens: promptTokens + completionTokens
-                    }
+                return res.json(completion);
+            } catch (agentError) {
+                console.error('AgentRouter API error:', agentError);
+
+                // Track failed request
+                await trackUsage(req.user.userId, model, 0, 0, false, agentError.message);
+
+                return res.status(500).json({
+                    error: 'AgentRouter API error',
+                    details: agentError.message,
+                    model: model
                 });
             }
+        }
 
-            // Fallback to OpenAI (won't work without valid API key)
-            const completion = await openai.chat.completions.create({
-                messages: messages,
-                model: model || 'gpt-3.5-turbo',
-                stream: true,
+        // Check if Custom Model
+        if (CUSTOM_MODELS[model]) {
+            const config = CUSTOM_MODELS[model];
+
+            // Simple prompt construction from messages - only use the last user message for better compatibility
+            const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+            const prompt = lastUserMessage ? lastUserMessage.content : messages.map(m => m.content).join('\n');
+
+            // Build form data for POST request
+            const formData = new URLSearchParams();
+            formData.append(config.param, prompt);
+
+            // Add extra parameters if needed
+            if (config.extra) {
+                Object.entries(config.extra).forEach(([k, v]) => formData.append(k, v));
+            }
+
+            // Use POST instead of GET to avoid URL length limits (414 errors)
+            const response = await fetch(config.url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData.toString()
             });
 
-            res.setHeader('Content-Type', 'text/event-stream');
-            res.setHeader('Cache-Control', 'no-cache');
-            res.setHeader('Connection', 'keep-alive');
+            const text = await response.text();
 
-            for await (const chunk of completion) {
-                const content = chunk.choices[0]?.delta?.content || '';
-                if (content) {
-                    res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
+            // Try to parse JSON response and extract the 'response' field
+            let content = text;
+            try {
+                const jsonData = JSON.parse(text);
+                if (jsonData.response) {
+                    content = jsonData.response;
+                } else if (jsonData.error) {
+                    // If API returns an error
+                    throw new Error(`Upstream API error: ${jsonData.error}`);
                 }
+            } catch (e) {
+                // If not JSON, check if it's HTML (error page)
+                if (text.trim().startsWith('<') || text.trim().startsWith('<!')) {
+                    throw new Error('Upstream API returned an error page. The model might be unavailable.');
+                }
+                // Use the raw text
+                content = text;
             }
-            res.write('data: [DONE]\n\n');
-            res.end();
 
-        } catch (error) {
-            console.error('Proxy Error:', error);
+            // CRITICAL: Validate that content is not empty
+            if (!content || content.trim() === '') {
+                throw new Error(`Model ${model} returned an empty response. The upstream API might not support this model or is experiencing issues.`);
+            }
 
-            // Track failed request
-            await trackUsage(req.user.userId, model, 0, 0, false, error.message);
+            // Estimate tokens for custom models
+            const promptTokens = estimateTokens(prompt);
+            const completionTokens = estimateTokens(content);
 
-            if (!res.headersSent) {
-                res.status(500).json({ error: 'Upstream Provider Error', details: error.message });
+            // Track usage
+            await trackUsage(req.user.userId, model, promptTokens, completionTokens, true);
+
+            // Return in OpenAI format
+            return res.json({
+                id: `chatcmpl-${Date.now()}`,
+                object: 'chat.completion',
+                created: Math.floor(Date.now() / 1000),
+                model: model,
+                choices: [{
+                    index: 0,
+                    message: { role: 'assistant', content: content },
+                    finish_reason: 'stop'
+                }],
+                usage: {
+                    prompt_tokens: promptTokens,
+                    completion_tokens: completionTokens,
+                    total_tokens: promptTokens + completionTokens
+                }
+            });
+        }
+
+        // Fallback to OpenAI (won't work without valid API key)
+        const completion = await openai.chat.completions.create({
+            messages: messages,
+            model: model || 'gpt-3.5-turbo',
+            stream: true,
+        });
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        for await (const chunk of completion) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            if (content) {
+                res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
             }
         }
-    });
+        res.write('data: [DONE]\n\n');
+        res.end();
+
+    } catch (error) {
+        console.error('Proxy Error:', error);
+
+        // Track failed request
+        await trackUsage(req.user.userId, model, 0, 0, false, error.message);
+
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Upstream Provider Error', details: error.message });
+        }
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
