@@ -329,20 +329,26 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
         if (CUSTOM_MODELS[model]) {
             const config = CUSTOM_MODELS[model];
 
-            // Simple prompt construction from messages
-            const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+            // Simple prompt construction from messages - only use the last user message for better compatibility
+            const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+            const prompt = lastUserMessage ? lastUserMessage.content : messages.map(m => m.content).join('\n');
 
-            // Build URL with query parameters
-            const url = new URL(config.url);
-            url.searchParams.append(config.param, prompt);
+            // Build form data for POST request
+            const formData = new URLSearchParams();
+            formData.append(config.param, prompt);
 
             // Add extra parameters if needed
             if (config.extra) {
-                Object.entries(config.extra).forEach(([k, v]) => url.searchParams.append(k, v));
+                Object.entries(config.extra).forEach(([k, v]) => formData.append(k, v));
             }
 
-            const response = await fetch(url.toString(), {
-                method: 'GET'
+            // Use POST instead of GET to avoid URL length limits (414 errors)
+            const response = await fetch(config.url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData.toString()
             });
 
             const text = await response.text();
