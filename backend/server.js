@@ -428,9 +428,13 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                     return;
                 }
 
+                // Log the actual response for debugging
+                console.log('AgentRouter response:', JSON.stringify(completion, null, 2));
+
                 // Non-streaming response - validate response structure
                 if (!completion || !completion.choices || !completion.choices[0]) {
-                    throw new Error('Invalid response structure from AgentRouter API');
+                    console.error('Invalid response - full completion object:', completion);
+                    throw new Error(`Invalid response structure from AgentRouter API. Got: ${JSON.stringify(completion)}`);
                 }
 
                 // Track usage
