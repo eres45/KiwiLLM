@@ -54,18 +54,7 @@ const Rankings = () => {
         // Google Gemma
         'gemma-2-4b': <Zap size={20} />,
         'gemma-2-12b': <Cpu size={20} />,
-        'gemma-2-27b': <Sparkles size={20} />,
-        // AgentRouter Models
-        'gpt-5.1': <Sparkles size={20} />,
-        'deepseek-v3.1': <Code size={20} />,
-        'deepseek-v3.2': <Code size={20} />,
-        'deepseek-r1-0528': <Sparkles size={20} />,
-        'glm-4.5': <Cpu size={20} />,
-        'glm-4.6': <Cpu size={20} />,
-        'claude-haiku-4-5-20251001': <Zap size={20} />,
-        'claude-sonnet-4-5-20250929': <Sparkles size={20} />,
-        'gemini-3-pro-preview': <Sparkles size={20} />,
-        'kimi-k2-thinking': <Sparkles size={20} />
+        'gemma-2-27b': <Sparkles size={20} />
     };
 
     // Model descriptions
@@ -114,18 +103,7 @@ const Rankings = () => {
         // Google Gemma
         'gemma-2-4b': 'Compact 4B parameter Gemma model for efficient inference.',
         'gemma-2-12b': 'Balanced 12B Gemma model for versatile tasks.',
-        'gemma-2-27b': 'Powerful 27B Gemma model for complex reasoning.',
-        // AgentRouter Models
-        'gpt-5.1': 'Latest GPT-5.1 model with enhanced reasoning.',
-        'deepseek-v3.1': 'Advanced DeepSeek V3.1 coding and reasoning model.',
-        'deepseek-v3.2': 'Latest DeepSeek V3.2 with improved performance.',
-        'deepseek-r1-0528': 'DeepSeek R1 reasoning model for complex tasks.',
-        'glm-4.5': 'Powerful Chinese-English bilingual model.',
-        'glm-4.6': 'Latest GLM model with enhanced capabilities.',
-        'claude-haiku-4-5-20251001': 'Fast and efficient Claude Haiku model.',
-        'claude-sonnet-4-5-20250929': 'Balanced Claude Sonnet for complex reasoning.',
-        'gemini-3-pro-preview': 'Preview of next-gen Gemini 3 Pro model.',
-        'kimi-k2-thinking': 'Advanced reasoning model with long context.'
+        'gemma-2-27b': 'Powerful 27B Gemma model for complex reasoning.'
     };
 
     // Fetch rankings data in real-time

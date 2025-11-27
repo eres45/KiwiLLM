@@ -40,28 +40,6 @@ const openai = process.env.OPENAI_MASTER_KEY
     ? new OpenAI({ apiKey: process.env.OPENAI_MASTER_KEY })
     : null;
 
-// --- AgentRouter Setup (for high-quality models) ---
-const agentrouter = process.env.AGENTROUTER_KEY
-    ? new OpenAI({
-        apiKey: process.env.AGENTROUTER_KEY,
-        baseURL: 'https://agentrouter.org/v1'
-    })
-    : null;
-
-// Models available through AgentRouter
-const AGENTROUTER_MODELS = {
-    'gpt-5.1': true,
-    'deepseek-v3.1': true,
-    'deepseek-v3.2': true,
-    'deepseek-r1-0528': true,
-    'glm-4.5': true,
-    'glm-4.6': true,
-    'claude-haiku-4-5-20251001': true,
-    'claude-sonnet-4-5-20250929': true,
-    'gemini-3-pro-preview': true,
-    'kimi-k2-thinking': true
-};
-
 // --- In-Memory Rate Limiting ---
 const rateLimits = new Map();
 
@@ -215,17 +193,6 @@ app.get('/v1/models', (req, res) => {
         { id: 'gemma-2-4b', object: 'model', created: Date.now(), owned_by: 'google' },
         { id: 'gemma-2-12b', object: 'model', created: Date.now(), owned_by: 'google' },
         { id: 'gemma-2-27b', object: 'model', created: Date.now(), owned_by: 'google' },
-        // AgentRouter Models (High-Quality)
-        { id: 'gpt-5.1', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'deepseek-v3.1', object: 'model', created: Date.now(), owned_by: 'deepseek' },
-        { id: 'deepseek-v3.2', object: 'model', created: Date.now(), owned_by: 'deepseek' },
-        { id: 'deepseek-r1-0528', object: 'model', created: Date.now(), owned_by: 'deepseek' },
-        { id: 'glm-4.5', object: 'model', created: Date.now(), owned_by: 'zhipu' },
-        { id: 'glm-4.6', object: 'model', created: Date.now(), owned_by: 'zhipu' },
-        { id: 'claude-haiku-4-5-20251001', object: 'model', created: Date.now(), owned_by: 'anthropic' },
-        { id: 'claude-sonnet-4-5-20250929', object: 'model', created: Date.now(), owned_by: 'anthropic' },
-        { id: 'gemini-3-pro-preview', object: 'model', created: Date.now(), owned_by: 'google' },
-        { id: 'kimi-k2-thinking', object: 'model', created: Date.now(), owned_by: 'moonshot' },
         { id: 'gpt-oss-120b', object: 'model', created: Date.now(), owned_by: 'gpt-oss' }
     ];
     res.json({ object: 'list', data: models });
@@ -358,104 +325,6 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
     const { model, messages } = req.body;
 
     try {
-        // Check if AgentRouter Model (high-quality models)
-        if (AGENTROUTER_MODELS[model]) {
-            if (!agentrouter) {
-                return res.status(500).json({
-                    error: 'AgentRouter key not configured. Please contact support.'
-                });
-            }
-
-            try {
-                // Extract IDE client headers from incoming request
-                // This allows AgentRouter to see the request as coming from IDE, not server
-                const forwardHeaders = {};
-                if (req.headers['user-agent']) {
-                    forwardHeaders['user-agent'] = req.headers['user-agent'];
-                }
-                if (req.headers['origin']) {
-                    forwardHeaders['origin'] = req.headers['origin'];
-                }
-                if (req.headers['referer']) {
-                    forwardHeaders['referer'] = req.headers['referer'];
-                }
-                if (req.headers['x-forwarded-for']) {
-                    forwardHeaders['x-forwarded-for'] = req.headers['x-forwarded-for'];
-                }
-
-                // Create a custom agentrouter client with forwarded headers for this request
-                const customAgentRouter = new OpenAI({
-                    apiKey: process.env.AGENTROUTER_KEY,
-                    baseURL: 'https://agentrouter.org/v1',
-                    defaultHeaders: forwardHeaders  // Pass IDE identity headers
-                });
-
-                // Forward request to AgentRouter with IDE headers
-                const completion = await customAgentRouter.chat.completions.create({
-                    model: model,
-                    messages: messages,
-                    temperature: req.body.temperature,
-                    max_tokens: req.body.max_tokens,
-                    top_p: req.body.top_p,
-                    stream: req.body.stream || false
-                });
-
-                // If streaming
-                if (req.body.stream) {
-                    res.setHeader('Content-Type', 'text/event-stream');
-                    res.setHeader('Cache-Control', 'no-cache');
-                    res.setHeader('Connection', 'keep-alive');
-
-                    try {
-                        for await (const chunk of completion) {
-                            res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-                        }
-                        res.write('data: [DONE]\n\n');
-                        res.end();
-                    } catch (streamError) {
-                        console.error('Streaming error:', streamError);
-                        if (!res.headersSent) {
-                            res.status(500).json({
-                                error: 'Error during streaming',
-                                details: streamError.message
-                            });
-                        }
-                    }
-
-                    // Track usage (estimate for streaming)
-                    const estimatedPromptTokens = estimateTokens(messages.map(m => m.content).join(' '));
-                    await trackUsage(req.user.userId, model, estimatedPromptTokens, 0, true);
-                    return;
-                }
-
-                // Log the actual response for debugging
-                console.log('AgentRouter response:', JSON.stringify(completion, null, 2));
-
-                // Non-streaming response - validate response structure
-                if (!completion || !completion.choices || !completion.choices[0]) {
-                    console.error('Invalid response - full completion object:', completion);
-                    throw new Error(`Invalid response structure from AgentRouter API. Got: ${JSON.stringify(completion)}`);
-                }
-
-                // Track usage
-                const usage = completion.usage || {};
-                await trackUsage(req.user.userId, model, usage.prompt_tokens || 0, usage.completion_tokens || 0, true);
-
-                return res.json(completion);
-            } catch (agentError) {
-                console.error('AgentRouter API error:', agentError);
-
-                // Track failed request
-                await trackUsage(req.user.userId, model, 0, 0, false, agentError.message);
-
-                return res.status(500).json({
-                    error: 'AgentRouter API error',
-                    details: agentError.message,
-                    model: model
-                });
-            }
-        }
-
         // Check if Custom Model
         if (CUSTOM_MODELS[model]) {
             const config = CUSTOM_MODELS[model];
