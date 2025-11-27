@@ -1775,6 +1775,36 @@ pre {
   border-radius: 2px;
 }
 
+/* Rate Limit Display */
+.rate-limit-display {
+  margin-top: 1rem;
+}
+
+.rate-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rate-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rate-stat label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.rate-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 .show-more {
   text-align: center;
   color: var(--text-secondary);
@@ -4478,6 +4508,7 @@ body.no-scroll {
     padding-bottom: 6rem !important;
   }
 }
+
 /* Rankings Page - Model Icons */
 .model-icon-rank {
   width: 40px;

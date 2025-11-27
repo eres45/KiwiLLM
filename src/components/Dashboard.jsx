@@ -13,6 +13,8 @@ const Dashboard = ({ onNavigate }) => {
     const [userData, setUserData] = useState(null);
     const [apiKeys, setApiKeys] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [rateLimitInfo, setRateLimitInfo] = useState({ used: 0, limit: 5, resetTime: null });
+    const [currentTime, setCurrentTime] = useState(Date.now());
 
     useEffect(() => {
         let unsubscribe = null;
@@ -51,6 +53,45 @@ const Dashboard = ({ onNavigate }) => {
             if (unsubscribe) unsubscribe();
         };
     }, [currentUser]);
+
+    // Rate limit tracking - updates every second
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(Date.now());
+        }, 1000); // Update every second for smooth countdown
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // Calculate rate limit info
+    useEffect(() => {
+        if (!userData?.plan || !userData?.stats) return;
+
+        const plan = userData.plan || 'Free';
+        const limit = plan === 'Pro' ? 100 : 5; // RPM
+
+        // Get the last usage timestamp
+        const lastUsed = userData.stats.lastUsed;
+        if (!lastUsed) {
+            setRateLimitInfo({ used: 0, limit, resetTime: null });
+            return;
+        }
+
+        const lastUsedTime = new Date(lastUsed).getTime();
+        const now = currentTime;
+        const windowDuration = 60 * 1000; // 60 seconds
+        const resetTime = lastUsedTime + windowDuration;
+
+        // If we're past the reset time, reset the counter
+        if (now >= resetTime) {
+            setRateLimitInfo({ used: 0, limit, resetTime: null });
+        } else {
+            // Estimate usage in current window (this is approximate)
+            // In reality, backend tracks this precisely
+            const usedInWindow = Math.min(userData.stats.totalRequests || 0, limit);
+            setRateLimitInfo({ used: usedInWindow, limit, resetTime });
+        }
+    }, [userData, currentTime]);
 
     const handleLogout = async () => {
         try {
@@ -180,6 +221,69 @@ const Dashboard = ({ onNavigate }) => {
                                     <div className="progress-fill" style={{ width: '100%' }}></div>
                                 </div>
                             </div>
+                        </div>
+                    </section>
+
+                    {/* Rate Limit Status */}
+                    <section className="dashboard-card">
+                        <div className="card-header">
+                            <Clock size={16} className="icon-blue" />
+                            <h3>Rate Limit Status</h3>
+                        </div>
+                        <p className="card-subtitle">
+                            {rateLimitInfo.limit} requests per minute •
+                            {userData?.plan === 'Pro' ? ' Pro Plan' : ' Free Plan'}
+                        </p>
+
+                        <div className="rate-limit-display">
+                            <div className="rate-stats">
+                                <div className="rate-stat">
+                                    <label>Used This Minute</label>
+                                    <div className="rate-value">{rateLimitInfo.used}/{rateLimitInfo.limit}</div>
+                                </div>
+                                <div className="rate-stat">
+                                    <label>Remaining</label>
+                                    <div className="rate-value">{rateLimitInfo.limit - rateLimitInfo.used}</div>
+                                </div>
+                                {rateLimitInfo.resetTime && (
+                                    <div className="rate-stat">
+                                        <label>Resets In</label>
+                                        <div className="rate-value">
+                                            {Math.max(0, Math.ceil((rateLimitInfo.resetTime - currentTime) / 1000))}s
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="usage-bar-container" style={{ marginTop: '1rem' }}>
+                                <div className="bar-label">
+                                    <span>Current Usage</span>
+                                    <span>{((rateLimitInfo.used / rateLimitInfo.limit) * 100).toFixed(0)}%</span>
+                                </div>
+                                <div className="progress-bg">
+                                    <div
+                                        className="progress-fill"
+                                        style={{
+                                            width: `${Math.min(100, (rateLimitInfo.used / rateLimitInfo.limit) * 100)}%`,
+                                            backgroundColor: rateLimitInfo.used >= rateLimitInfo.limit ? '#ef4444' : '#3b82f6'
+                                        }}
+                                    ></div>
+                                </div>
+                            </div>
+
+                            {rateLimitInfo.used >= rateLimitInfo.limit && (
+                                <div className="rate-limit-warning" style={{
+                                    marginTop: '1rem',
+                                    padding: '0.75rem',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    borderRadius: '0.5rem',
+                                    color: '#ef4444',
+                                    fontSize: '0.875rem'
+                                }}>
+                                    ⚠️ Rate limit reached. Requests will be rejected until reset.
+                                </div>
+                            )}
                         </div>
                     </section>
 

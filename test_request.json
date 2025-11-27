@@ -1,0 +1,9 @@
+{
+    "model": "deepseek-v3",
+    "messages": [
+        {
+            "role": "user",
+            "content": "Say hello in one word"
+        }
+    ]
+}

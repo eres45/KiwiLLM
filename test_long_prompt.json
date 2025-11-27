@@ -1,0 +1,13 @@
+{
+    "model": "deepseek-v3",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are an expert Python developer specializing in data structures and algorithms."
+        },
+        {
+            "role": "user",
+            "content": "Write a comprehensive Python function that implements a binary search tree with insert, delete, search, and in-order traversal methods. Include detailed comments explaining each method and proper error handling for edge cases like empty trees, duplicate values, and invalid inputs. Make sure to handle both integer and string data types."
+        }
+    ]
+}
