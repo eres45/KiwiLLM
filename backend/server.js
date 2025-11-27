@@ -383,16 +383,21 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                     forwardHeaders['x-forwarded-for'] = req.headers['x-forwarded-for'];
                 }
 
+                // Create a custom agentrouter client with forwarded headers for this request
+                const customAgentRouter = new OpenAI({
+                    apiKey: process.env.AGENTROUTER_KEY,
+                    baseURL: 'https://agentrouter.org/v1',
+                    defaultHeaders: forwardHeaders  // Pass IDE identity headers
+                });
+
                 // Forward request to AgentRouter with IDE headers
-                const completion = await agentrouter.chat.completions.create({
+                const completion = await customAgentRouter.chat.completions.create({
                     model: model,
                     messages: messages,
                     temperature: req.body.temperature,
                     max_tokens: req.body.max_tokens,
                     top_p: req.body.top_p,
                     stream: req.body.stream || false
-                }, {
-                    headers: forwardHeaders  // Pass IDE identity headers
                 });
 
                 // If streaming
