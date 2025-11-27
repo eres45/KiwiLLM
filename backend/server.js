@@ -389,127 +389,112 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                 res.end();
 
                 // Track usage (estimate for streaming)
-                const estimatedPromptTokens = estimateTokens(messages.map(m => m.content).join(' '));
-                await trackUsage(req.user.userId, model, estimatedPromptTokens, 0, true);
-                return;
+
+                // Simple prompt construction from messages - only use the last user message for better compatibility
+                const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+                const prompt = lastUserMessage ? lastUserMessage.content : messages.map(m => m.content).join('\n');
+
+                // Build form data for POST request
+                const formData = new URLSearchParams();
+                formData.append(config.param, prompt);
+
+                // Add extra parameters if needed
+                if (config.extra) {
+                    Object.entries(config.extra).forEach(([k, v]) => formData.append(k, v));
+                }
+
+                // Use POST instead of GET to avoid URL length limits (414 errors)
+                const response = await fetch(config.url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData.toString()
+                });
+
+                const text = await response.text();
+
+                // Try to parse JSON response and extract the 'response' field
+                let content = text;
+                try {
+                    const jsonData = JSON.parse(text);
+                    if (jsonData.response) {
+                        content = jsonData.response;
+                    } else if (jsonData.error) {
+                        // If API returns an error
+                        throw new Error(`Upstream API error: ${jsonData.error}`);
+                    }
+                } catch (e) {
+                    // If not JSON, check if it's HTML (error page)
+                    if (text.trim().startsWith('<') || text.trim().startsWith('<!')) {
+                        throw new Error('Upstream API returned an error page. The model might be unavailable.');
+                    }
+                    // Use the raw text
+                    content = text;
+                }
+
+                // CRITICAL: Validate that content is not empty
+                if (!content || content.trim() === '') {
+                    throw new Error(`Model ${model} returned an empty response. The upstream API might not support this model or is experiencing issues.`);
+                }
+
+                // Estimate tokens for custom models
+                const promptTokens = estimateTokens(prompt);
+                const completionTokens = estimateTokens(content);
+
+                // Track usage
+                await trackUsage(req.user.userId, model, promptTokens, completionTokens, true);
+
+                // Return in OpenAI format
+                return res.json({
+                    id: `chatcmpl-${Date.now()}`,
+                    object: 'chat.completion',
+                    created: Math.floor(Date.now() / 1000),
+                    model: model,
+                    choices: [{
+                        index: 0,
+                        message: { role: 'assistant', content: content },
+                        finish_reason: 'stop'
+                    }],
+                    usage: {
+                        prompt_tokens: promptTokens,
+                        completion_tokens: completionTokens,
+                        total_tokens: promptTokens + completionTokens
+                    }
+                });
             }
 
-            // Non-streaming response
-            const usage = completion.usage || {};
-            await trackUsage(req.user.userId, model, usage.prompt_tokens || 0, usage.completion_tokens || 0, true);
-
-            return res.json(completion);
-        }
-
-        // Check if Custom Model
-        if (CUSTOM_MODELS[model]) {
-            const config = CUSTOM_MODELS[model];
-
-            // Simple prompt construction from messages - only use the last user message for better compatibility
-            const lastUserMessage = messages.filter(m => m.role === 'user').pop();
-            const prompt = lastUserMessage ? lastUserMessage.content : messages.map(m => m.content).join('\n');
-
-            // Build form data for POST request
-            const formData = new URLSearchParams();
-            formData.append(config.param, prompt);
-
-            // Add extra parameters if needed
-            if (config.extra) {
-                Object.entries(config.extra).forEach(([k, v]) => formData.append(k, v));
-            }
-
-            // Use POST instead of GET to avoid URL length limits (414 errors)
-            const response = await fetch(config.url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: formData.toString()
+            // Fallback to OpenAI (won't work without valid API key)
+            const completion = await openai.chat.completions.create({
+                messages: messages,
+                model: model || 'gpt-3.5-turbo',
+                stream: true,
             });
 
-            const text = await response.text();
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
 
-            // Try to parse JSON response and extract the 'response' field
-            let content = text;
-            try {
-                const jsonData = JSON.parse(text);
-                if (jsonData.response) {
-                    content = jsonData.response;
-                } else if (jsonData.error) {
-                    // If API returns an error
-                    throw new Error(`Upstream API error: ${jsonData.error}`);
+            for await (const chunk of completion) {
+                const content = chunk.choices[0]?.delta?.content || '';
+                if (content) {
+                    res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
                 }
-            } catch (e) {
-                // If not JSON, check if it's HTML (error page)
-                if (text.trim().startsWith('<') || text.trim().startsWith('<!')) {
-                    throw new Error('Upstream API returned an error page. The model might be unavailable.');
-                }
-                // Use the raw text
-                content = text;
             }
+            res.write('data: [DONE]\n\n');
+            res.end();
 
-            // CRITICAL: Validate that content is not empty
-            if (!content || content.trim() === '') {
-                throw new Error(`Model ${model} returned an empty response. The upstream API might not support this model or is experiencing issues.`);
-            }
+        } catch (error) {
+            console.error('Proxy Error:', error);
 
-            // Estimate tokens for custom models
-            const promptTokens = estimateTokens(prompt);
-            const completionTokens = estimateTokens(content);
+            // Track failed request
+            await trackUsage(req.user.userId, model, 0, 0, false, error.message);
 
-            // Track usage
-            await trackUsage(req.user.userId, model, promptTokens, completionTokens, true);
-
-            // Return in OpenAI format
-            return res.json({
-                id: `chatcmpl-${Date.now()}`,
-                object: 'chat.completion',
-                created: Math.floor(Date.now() / 1000),
-                model: model,
-                choices: [{
-                    index: 0,
-                    message: { role: 'assistant', content: content },
-                    finish_reason: 'stop'
-                }],
-                usage: {
-                    prompt_tokens: promptTokens,
-                    completion_tokens: completionTokens,
-                    total_tokens: promptTokens + completionTokens
-                }
-            });
-        }
-
-        // Fallback to OpenAI (won't work without valid API key)
-        const completion = await openai.chat.completions.create({
-            messages: messages,
-            model: model || 'gpt-3.5-turbo',
-            stream: true,
-        });
-
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-
-        for await (const chunk of completion) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            if (content) {
-                res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
+            if (!res.headersSent) {
+                res.status(500).json({ error: 'Upstream Provider Error', details: error.message });
             }
         }
-        res.write('data: [DONE]\n\n');
-        res.end();
-
-    } catch (error) {
-        console.error('Proxy Error:', error);
-
-        // Track failed request
-        await trackUsage(req.user.userId, model, 0, 0, false, error.message);
-
-        if (!res.headersSent) {
-            res.status(500).json({ error: 'Upstream Provider Error', details: error.message });
-        }
-    }
-});
+    });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
