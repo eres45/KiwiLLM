@@ -367,7 +367,23 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
             }
 
             try {
-                // Forward request to AgentRouter
+                // Extract IDE client headers from incoming request
+                // This allows AgentRouter to see the request as coming from IDE, not server
+                const forwardHeaders = {};
+                if (req.headers['user-agent']) {
+                    forwardHeaders['user-agent'] = req.headers['user-agent'];
+                }
+                if (req.headers['origin']) {
+                    forwardHeaders['origin'] = req.headers['origin'];
+                }
+                if (req.headers['referer']) {
+                    forwardHeaders['referer'] = req.headers['referer'];
+                }
+                if (req.headers['x-forwarded-for']) {
+                    forwardHeaders['x-forwarded-for'] = req.headers['x-forwarded-for'];
+                }
+
+                // Forward request to AgentRouter with IDE headers
                 const completion = await agentrouter.chat.completions.create({
                     model: model,
                     messages: messages,
@@ -375,6 +391,8 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                     max_tokens: req.body.max_tokens,
                     top_p: req.body.top_p,
                     stream: req.body.stream || false
+                }, {
+                    headers: forwardHeaders  // Pass IDE identity headers
                 });
 
                 // If streaming
