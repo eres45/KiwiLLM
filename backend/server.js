@@ -359,10 +359,22 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
                 const jsonData = JSON.parse(text);
                 if (jsonData.response) {
                     content = jsonData.response;
+                } else if (jsonData.error) {
+                    // If API returns an error
+                    throw new Error(`Upstream API error: ${jsonData.error}`);
                 }
             } catch (e) {
-                // If not JSON, use the raw text
+                // If not JSON, check if it's HTML (error page)
+                if (text.trim().startsWith('<') || text.trim().startsWith('<!')) {
+                    throw new Error('Upstream API returned an error page. The model might be unavailable.');
+                }
+                // Use the raw text
                 content = text;
+            }
+
+            // CRITICAL: Validate that content is not empty
+            if (!content || content.trim() === '') {
+                throw new Error(`Model ${model} returned an empty response. The upstream API might not support this model or is experiencing issues.`);
             }
 
             // Estimate tokens for custom models
