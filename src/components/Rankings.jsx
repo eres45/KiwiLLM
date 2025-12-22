@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, ArrowUp, ArrowDown, Zap, Sparkles, Box, Code, Cpu, MessageSquare, Image, Crown } from 'lucide-react';
+import { TrendingUp, ArrowUp, ArrowDown, Zap, Sparkles, Box, Code, Cpu, MessageSquare, Image, Crown, MessageCircle } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
@@ -10,100 +10,36 @@ const Rankings = () => {
 
     // Model icons mapping
     const modelIcons = {
+        'gpt-4': <Box size={20} />,
         'deepseek-v3': <Zap size={20} />,
         'deepseek-r1': <Zap size={20} />,
-        'grok-4': <Sparkles size={20} />,
-        'qwen2.5-72b-chat': <Box size={20} />,
-        'qwen-coder-plus': <Code size={20} />,
         'gpt-oss-120b': <Cpu size={20} />,
-        'dark-code-76': <Code size={20} />,
-        // Qwen 3
-        'qwen3-coder-plus': <Code size={20} />,
-        'qwen3-coder-480b-a35b-instruct': <Code size={20} />,
-        'qwen3-72b-chat': <MessageSquare size={20} />,
-        'qwen3-72b-coder': <Code size={20} />,
-        'qwen3-72b-math': <Cpu size={20} />,
-        'qwen3-72b-vl': <Image size={20} />,
-        'qwen3-32b-chat': <MessageSquare size={20} />,
-        'qwen3-32b-vl': <Image size={20} />,
-        // Qwen 2.5
-        'qwen2.5-72b-instruct': <Box size={20} />,
-        'qwen2.5-72b-coder-instruct': <Code size={20} />,
-        // OpenAI GPT-5
-        'gpt-5': <Crown size={20} />,
-        'gpt-5-mini': <Zap size={20} />,
-        'gpt-5-nano': <Zap size={20} />,
-        // OpenAI O-Series
-        'o3': <Cpu size={20} />,
-        'o3-mini': <Cpu size={20} />,
-        'o4-mini': <Cpu size={20} />,
-        'o1': <Cpu size={20} />,
-        // OpenAI GPT-4.1
-        'gpt-4.1': <Sparkles size={20} />,
-        'gpt-4.1-mini': <Zap size={20} />,
-        'gpt-4.1-nano': <Zap size={20} />,
-        // OpenAI GPT-4
-        'gpt-4o': <Box size={20} />,
-        'gpt-4o-mini': <Zap size={20} />,
-        'gpt-4-turbo': <Box size={20} />,
-        'gpt-4': <Box size={20} />,
-        // Google Gemini
-        'gemini-2.5-pro': <Sparkles size={20} />,
-        'gemini-2.5-deep-search': <Sparkles size={20} />,
-        'gemini-2.5-flash': <Zap size={20} />,
-        // Google Gemma
-        'gemma-2-4b': <Zap size={20} />,
-        'gemma-2-12b': <Cpu size={20} />,
-        'gemma-2-27b': <Sparkles size={20} />
+        'gpt-oss-20b': <Cpu size={20} />,
+        'kimi-k2-instruct': <Sparkles size={20} />,
+        'mistral-small': <Zap size={20} />,
+        'qwen3-next': <Cpu size={20} />,
+        'deepseek-v3.1': <Box size={20} />,
+        'copilot-chat': <MessageCircle size={20} />,
+        'copilot-think': <Cpu size={20} />,
+        'gemini-pro': <Sparkles size={20} />,
+        'llama-3-meta': <MessageSquare size={20} />
     };
 
     // Model descriptions
     const modelDescriptions = {
-        'deepseek-v3': 'Latest DeepSeek model with enhanced reasoning capabilities and superior performance.',
-        'deepseek-r1': 'Optimized for high-speed performance and efficient resource usage.',
-        'grok-4': 'Advanced model from xAI with strong reasoning and real-time knowledge.',
-        'qwen2.5-72b-chat': 'Large language model optimized for chat and conversational AI.',
-        'qwen-coder-plus': 'Specialized model for code generation, debugging, and analysis.',
-        'gpt-oss-120b': 'Open source alternative to GPT-4 class models with broad knowledge.',
-        'dark-code-76': 'Powerful 12B coding model optimized for code generation and analysis.',
-        // Qwen 3
-        'qwen3-coder-plus': 'Flagship Qwen 3 coding model for advanced software development.',
-        'qwen3-coder-480b-a35b-instruct': 'Massive 480B parameter coding model for complex architecture.',
-        'qwen3-72b-chat': 'Advanced 72B chat model with improved reasoning and dialogue.',
-        'qwen3-72b-coder': '72B parameter model specialized for code generation.',
-        'qwen3-72b-math': 'Specialized model for mathematical reasoning and problem solving.',
-        'qwen3-72b-vl': 'Vision-Language model capable of understanding images and text.',
-        'qwen3-32b-chat': 'Efficient 32B chat model balancing speed and performance.',
-        'qwen3-32b-vl': 'Efficient Vision-Language model for image understanding.',
-        // Qwen 2.5
-        'qwen2.5-72b-instruct': 'Instruction-tuned model for following complex commands.',
-        'qwen2.5-72b-coder-instruct': 'Instruction-tuned coding model for precise code generation.',
-        // OpenAI GPT-5
-        'gpt-5': 'Next-generation foundation model with unprecedented capabilities.',
-        'gpt-5-mini': 'Efficient version of GPT-5 for high-speed tasks.',
-        'gpt-5-nano': 'Ultra-lightweight GPT-5 model for edge cases.',
-        // OpenAI O-Series
-        'o3': 'Advanced reasoning model for complex problem solving.',
-        'o3-mini': 'Fast reasoning model for quick logical tasks.',
-        'o4-mini': 'Next-gen compact reasoning model.',
-        'o1': 'First-generation reasoning model.',
-        // OpenAI GPT-4.1
-        'gpt-4.1': 'Enhanced GPT-4 model with improved accuracy.',
-        'gpt-4.1-mini': 'Efficient GPT-4.1 model for general tasks.',
-        'gpt-4.1-nano': 'Compact GPT-4.1 model for simple queries.',
-        // OpenAI GPT-4
-        'gpt-4o': 'Omni model with multimodal capabilities.',
-        'gpt-4o-mini': 'Cost-effective small model for simple tasks.',
-        'gpt-4-turbo': 'High-performance GPT-4 model.',
-        'gpt-4': 'Classic GPT-4 model.',
-        // Google Gemini
-        'gemini-2.5-pro': 'Latest Gemini 2.5 Pro model for complex tasks.',
-        'gemini-2.5-deep-search': 'Specialized Gemini model for deep research and search.',
-        'gemini-2.5-flash': 'High-speed, cost-effective Gemini model.',
-        // Google Gemma
-        'gemma-2-4b': 'Compact 4B parameter Gemma model for efficient inference.',
-        'gemma-2-12b': 'Balanced 12B Gemma model for versatile tasks.',
-        'gemma-2-27b': 'Powerful 27B Gemma model for complex reasoning.'
+        'gpt-4': 'Powerful language model optimized for conversational AI and complex reasoning.',
+        'deepseek-v3': 'Direct access to high-performance DeepSeek-v3.2 model.',
+        'deepseek-r1': 'High-speed reasoning model with direct direct API access.',
+        'gpt-oss-120b': 'High-performance open-source model with massive knowledge base.',
+        'gpt-oss-20b': 'Efficient and fast open-source model for general purpose tasks.',
+        'kimi-k2-instruct': 'Advanced instruction-following model with deep understanding.',
+        'mistral-small': 'Balanced performance and efficiency (24B).',
+        'qwen3-next': 'Top-tier Qwen 2.5 72B instruction model.',
+        'deepseek-v3.1': 'Incremental update to the DeepSeek-v3 model with improved stability.',
+        'copilot-chat': 'Your everyday AI companion for chat, writing, and creativity.',
+        'copilot-think': 'Advanced reasoning model designed for deep thought and planning.',
+        'gemini-pro': 'Next-gen Gemini 2.5 Pro multimodal model.',
+        'llama-3-meta': 'Llama 3.1 405B - Largest open source model.'
     };
 
     // Fetch rankings data in real-time

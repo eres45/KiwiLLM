@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Info, Crown, Clock, Activity, Zap, Box, Cpu, Sparkles, Code, LayoutGrid, Image, Mic, MessageSquare } from 'lucide-react';
+import { Search, Info, Crown, Clock, Activity, Zap, Box, Cpu, Sparkles, Code, LayoutGrid, Image, Mic, MessageSquare, MessageCircle } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
@@ -12,382 +12,134 @@ const Models = () => {
     // Real context window sizes from research
     const models = [
         {
+            id: 'gpt-4',
+            name: 'GPT-4',
+            provider: 'OpenAI',
+            desc: 'Powerful language model optimized for conversational AI and complex reasoning.',
+            context: '8k',
+            tags: ['Stable', 'Popular'],
+            icon: <Box size={24} />,
+            tier: 'Free Tier'
+        },
+        {
             id: 'deepseek-v3',
-            name: 'deepseek-v3',
+            name: 'DeepSeek-v3.2',
             provider: 'DeepSeek',
-            desc: 'Latest DeepSeek model with enhanced reasoning capabilities and superior performance.',
+            desc: 'Direct access to high-performance DeepSeek-v3.2 model.',
             context: '128k',
-            tags: ['BETA', 'Reasoning'],
+            tags: ['New', 'Direct'],
             icon: <Zap size={24} />,
             tier: 'Free Tier'
         },
         {
             id: 'deepseek-r1',
-            name: 'deepseek-r1',
+            name: 'DeepSeek-R1',
             provider: 'DeepSeek',
-            desc: 'Optimized for high-speed performance and efficient resource usage.',
+            desc: 'High-speed reasoning model with direct direct API access.',
             context: '128k',
-            tags: ['Fast', 'Efficient'],
+            tags: ['Fast', 'Reasoning'],
             icon: <Zap size={24} />,
             tier: 'Free Tier'
-        },
-        {
-            id: 'grok-4',
-            name: 'grok-4',
-            provider: 'xAI',
-            desc: 'Advanced model from xAI with strong reasoning and real-time knowledge.',
-            context: '256k',
-            tags: ['Reasoning', 'Function Calling'],
-            icon: <Sparkles size={24} />,
-            tier: 'Pro Tier'
-        },
-        {
-            id: 'qwen2.5-72b-chat',
-            name: 'qwen2.5-72b-chat',
-            provider: 'Qwen',
-            desc: 'Large language model optimized for chat and conversational AI.',
-            context: '128k',
-            tags: ['Chat', 'General'],
-            icon: <Box size={24} />,
-            tier: 'Basic Tier'
-        },
-        {
-            id: 'qwen-coder-plus',
-            name: 'qwen-coder-plus',
-            provider: 'Qwen',
-            desc: 'Specialized model for code generation, debugging, and analysis.',
-            context: '128k',
-            tags: ['Coding', 'Function Calling'],
-            icon: <Code size={24} />,
-            tier: 'Pro Tier'
         },
         {
             id: 'gpt-oss-120b',
-            name: 'gpt-oss-120b',
+            name: 'GPT-OSS-120B',
             provider: 'GPT-OSS',
-            desc: 'Open source alternative to GPT-4 class models with broad knowledge.',
+            desc: 'High-performance open-source model with massive knowledge base.',
             context: '128k',
-            tags: ['Open Source', 'General'],
+            tags: ['SOTA', 'Fast'],
             icon: <Cpu size={24} />,
-            tier: 'Basic Tier'
-        },
-        {
-            id: 'dark-code-76',
-            name: 'dark-code-76',
-            provider: 'DarkAI',
-            desc: 'Powerful 12B coding model optimized for code generation and analysis.',
-            context: '128k',
-            tags: ['Coding', 'Fast'],
-            icon: <Code size={24} />,
-            tier: 'Free Tier'
-        },
-        // Qwen 3 Series
-        {
-            id: 'qwen3-coder-plus',
-            name: 'qwen3-coder-plus',
-            provider: 'Qwen',
-            desc: 'Flagship Qwen 3 coding model for advanced software development.',
-            context: '128k',
-            tags: ['Coding', 'SOTA'],
-            icon: <Code size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'qwen3-coder-480b-a35b-instruct',
-            name: 'qwen3-coder-480b',
-            provider: 'Qwen',
-            desc: 'Massive 480B parameter coding model for complex architecture.',
-            context: '128k',
-            tags: ['Coding', 'Massive'],
-            icon: <Code size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'qwen3-72b-chat',
-            name: 'qwen3-72b-chat',
-            provider: 'Qwen',
-            desc: 'Advanced 72B chat model with improved reasoning and dialogue.',
-            context: '128k',
-            tags: ['Chat', 'Reasoning'],
-            icon: <MessageSquare size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'qwen3-72b-coder',
-            name: 'qwen3-72b-coder',
-            provider: 'Qwen',
-            desc: '72B parameter model specialized for code generation.',
-            context: '128k',
-            tags: ['Coding', 'Large'],
-            icon: <Code size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'qwen3-72b-math',
-            name: 'qwen3-72b-math',
-            provider: 'Qwen',
-            desc: 'Specialized model for mathematical reasoning and problem solving.',
-            context: '128k',
-            tags: ['Math', 'Reasoning'],
-            icon: <Cpu size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'qwen3-72b-vl',
-            name: 'qwen3-72b-vl',
-            provider: 'Qwen',
-            desc: 'Vision-Language model capable of understanding images and text.',
-            context: '128k',
-            tags: ['Vision', 'Multimodal'],
-            icon: <Image size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'qwen3-32b-chat',
-            name: 'qwen3-32b-chat',
-            provider: 'Qwen',
-            desc: 'Efficient 32B chat model balancing speed and performance.',
-            context: '128k',
-            tags: ['Chat', 'Balanced'],
-            icon: <MessageSquare size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'qwen3-32b-vl',
-            name: 'qwen3-32b-vl',
-            provider: 'Qwen',
-            desc: 'Efficient Vision-Language model for image understanding.',
-            context: '128k',
-            tags: ['Vision', 'Fast'],
-            icon: <Image size={24} />,
-            tier: 'Free Tier'
-        },
-        // Qwen 2.5 Series
-        {
-            id: 'qwen2.5-72b-instruct',
-            name: 'qwen2.5-72b-instruct',
-            provider: 'Qwen',
-            desc: 'Instruction-tuned model for following complex commands.',
-            context: '128k',
-            tags: ['Instruct', 'General'],
-            icon: <Box size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'qwen2.5-72b-coder-instruct',
-            name: 'qwen2.5-72b-coder',
-            provider: 'Qwen',
-            desc: 'Instruction-tuned coding model for precise code generation.',
-            context: '128k',
-            tags: ['Coding', 'Instruct'],
-            icon: <Code size={24} />,
-            tier: 'Free Tier'
-        },
-        // OpenAI GPT-5 Series
-        {
-            id: 'gpt-5',
-            name: 'gpt-5',
-            provider: 'OpenAI',
-            desc: 'Next-generation foundation model with unprecedented capabilities.',
-            context: '128k',
-            tags: ['Future', 'SOTA'],
-            icon: <Crown size={24} />,
             tier: 'Pro Tier'
         },
         {
-            id: 'gpt-5-mini',
-            name: 'gpt-5-mini',
-            provider: 'OpenAI',
-            desc: 'Efficient version of GPT-5 for high-speed tasks.',
+            id: 'gpt-oss-20b',
+            name: 'GPT-OSS-20B',
+            provider: 'GPT-OSS',
+            desc: 'Efficient and fast open-source model for general purpose tasks.',
             context: '128k',
-            tags: ['Future', 'Fast'],
-            icon: <Zap size={24} />,
+            tags: ['Efficient', 'Fast'],
+            icon: <Cpu size={24} />,
             tier: 'Free Tier'
         },
         {
-            id: 'gpt-5-nano',
-            name: 'gpt-5-nano',
-            provider: 'OpenAI',
-            desc: 'Ultra-lightweight GPT-5 model for edge cases.',
+            id: 'kimi-k2-instruct',
+            name: 'Kimi-K2-Instruct',
+            provider: 'MoonshotAI',
+            desc: 'Advanced instruction-following model with deep understanding.',
+            context: '128k',
+            tags: ['Reasoning', 'New'],
+            icon: <Sparkles size={24} />,
+            tier: 'Free Tier'
+        },
+        {
+            id: 'mistral-small',
+            name: 'Mistral Small 24B',
+            provider: 'MistralAI',
+            desc: 'Balanced performance and efficiency for a wide range of tasks.',
             context: '32k',
-            tags: ['Future', 'Ultra-Fast'],
-            icon: <Zap size={24} />,
-            tier: 'Free Tier'
-        },
-        // OpenAI O-Series (Reasoning)
-        {
-            id: 'o3',
-            name: 'o3',
-            provider: 'OpenAI',
-            desc: 'Advanced reasoning model for complex problem solving.',
-            context: '128k',
-            tags: ['Reasoning', 'SOTA'],
-            icon: <Cpu size={24} />,
-            tier: 'Pro Tier'
-        },
-        {
-            id: 'o3-mini',
-            name: 'o3-mini',
-            provider: 'OpenAI',
-            desc: 'Fast reasoning model for quick logical tasks.',
-            context: '128k',
-            tags: ['Reasoning', 'Fast'],
-            icon: <Cpu size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'o4-mini',
-            name: 'o4-mini',
-            provider: 'OpenAI',
-            desc: 'Next-gen compact reasoning model.',
-            context: '128k',
-            tags: ['Reasoning', 'Future'],
-            icon: <Cpu size={24} />,
-            tier: 'Free Tier'
-        },
-        {
-            id: 'o1',
-            name: 'o1',
-            provider: 'OpenAI',
-            desc: 'First-generation reasoning model.',
-            context: '128k',
-            tags: ['Reasoning'],
-            icon: <Cpu size={24} />,
-            tier: 'Pro Tier'
-        },
-        // OpenAI GPT-4.1 Series
-        {
-            id: 'gpt-4.1',
-            name: 'gpt-4.1',
-            provider: 'OpenAI',
-            desc: 'Enhanced GPT-4 model with improved accuracy.',
-            context: '128k',
-            tags: ['New', 'Reliable'],
-            icon: <Sparkles size={24} />,
-            tier: 'Pro Tier'
-        },
-        {
-            id: 'gpt-4.1-mini',
-            name: 'gpt-4.1-mini',
-            provider: 'OpenAI',
-            desc: 'Efficient GPT-4.1 model for general tasks.',
-            context: '128k',
-            tags: ['New', 'Fast'],
+            tags: ['Stable', 'Efficient'],
             icon: <Zap size={24} />,
             tier: 'Free Tier'
         },
         {
-            id: 'gpt-4.1-nano',
-            name: 'gpt-4.1-nano',
-            provider: 'OpenAI',
-            desc: 'Compact GPT-4.1 model for simple queries.',
-            context: '16k',
-            tags: ['New', 'Ultra-Fast'],
-            icon: <Zap size={24} />,
-            tier: 'Free Tier'
+            id: 'qwen3-next',
+            name: 'Qwen 2.5 72B Instruct',
+            provider: 'Qwen',
+            desc: 'Top-tier instruction model with massive parameter count.',
+            context: '64k',
+            tags: ['Experimental', 'New'],
+            icon: <Cpu size={24} />,
+            tier: 'Pro Tier'
         },
-        // OpenAI GPT-4 Series
         {
-            id: 'gpt-4o',
-            name: 'gpt-4o',
-            provider: 'OpenAI',
-            desc: 'Omni model with multimodal capabilities.',
+            id: 'deepseek-v3.1',
+            name: 'DeepSeek-v3.1',
+            provider: 'DeepSeek',
+            desc: 'Incremental update to the DeepSeek-v3 model with improved stability.',
             context: '128k',
-            tags: ['Multimodal', 'Versatile'],
+            tags: ['Stable', 'Direct'],
             icon: <Box size={24} />,
-            tier: 'Pro Tier'
-        },
-        {
-            id: 'gpt-4o-mini',
-            name: 'gpt-4o-mini',
-            provider: 'OpenAI',
-            desc: 'Cost-effective small model for simple tasks.',
-            context: '128k',
-            tags: ['Efficient'],
-            icon: <Zap size={24} />,
             tier: 'Free Tier'
         },
         {
-            id: 'gpt-4-turbo',
-            name: 'gpt-4-turbo',
-            provider: 'OpenAI',
-            desc: 'High-performance GPT-4 model.',
-            context: '128k',
-            tags: ['Powerful'],
-            icon: <Box size={24} />,
-            tier: 'Pro Tier'
-        },
-        {
-            id: 'gpt-4',
-            name: 'gpt-4',
-            provider: 'OpenAI',
-            desc: 'Classic GPT-4 model.',
-            context: '8k',
-            tags: ['Legacy'],
-            icon: <Box size={24} />,
-            tier: 'Pro Tier'
-        },
-        // Google Gemini Series
-        {
-            id: 'gemini-2.5-pro',
-            name: 'gemini-2.5-pro',
-            provider: 'Google',
-            desc: 'Latest Gemini 2.5 Pro model for complex tasks.',
-            context: '2m',
-            tags: ['New', 'SOTA'],
-            icon: <Sparkles size={24} />,
-            tier: 'Pro Tier'
-        },
-        {
-            id: 'gemini-2.5-deep-search',
-            name: 'gemini-2.5-deep-search',
-            provider: 'Google',
-            desc: 'Specialized Gemini model for deep research and search.',
-            context: '128k',
-            tags: ['Research', 'Search'],
-            icon: <Sparkles size={24} />,
-            tier: 'Pro Tier'
-        },
-        {
-            id: 'gemini-2.5-flash',
-            name: 'gemini-2.5-flash',
-            provider: 'Google',
-            desc: 'High-speed, cost-effective Gemini model.',
-            context: '1m',
-            tags: ['Fast', 'Efficient'],
-            icon: <Zap size={24} />,
-            tier: 'Free Tier'
-        },
-        // Google Gemma Series
-        {
-            id: 'gemma-2-4b',
-            name: 'gemma-2-4b',
-            provider: 'Google',
-            desc: 'Compact 4B parameter Gemma model for efficient inference.',
-            context: '8k',
-            tags: ['Efficient', 'Lightweight'],
-            icon: <Zap size={24} />,
+            id: 'copilot-chat',
+            name: 'Copilot Chat',
+            provider: 'Microsoft',
+            desc: 'Your everyday AI companion for chat, writing, and creativity.',
+            context: '32k',
+            tags: ['Creative', 'Assistant'],
+            icon: <MessageCircle size={24} />,
             tier: 'Free Tier'
         },
         {
-            id: 'gemma-2-12b',
-            name: 'gemma-2-12b',
-            provider: 'Google',
-            desc: 'Balanced 12B Gemma model for versatile tasks.',
-            context: '8k',
-            tags: ['Balanced', 'Versatile'],
+            id: 'copilot-think',
+            name: 'Copilot Think',
+            provider: 'Microsoft',
+            desc: 'Advanced reasoning model designed for deep thought and planning.',
+            context: '32k',
+            tags: ['Reasoning', 'Smart'],
             icon: <Cpu size={24} />,
             tier: 'Free Tier'
         },
         {
-            id: 'gemma-2-27b',
-            name: 'gemma-2-27b',
-            provider: 'Google',
-            desc: 'Powerful 27B Gemma model for complex reasoning.',
-            context: '8k',
-            tags: ['SOTA', 'Reasoning'],
+            id: 'gemini-pro',
+            name: 'Gemini 2.5 Pro',
+            provider: 'Google DeepMind',
+            desc: 'Next-gen multimodal model with superior reasoning capabilities.',
+            context: '32k',
+            tags: ['Versatile', 'Fast'],
             icon: <Sparkles size={24} />,
-            tier: 'Pro Tier'
+            tier: 'Free Tier'
+        },
+        {
+            id: 'llama-3-meta',
+            name: 'Llama 3.1 405B',
+            provider: 'Meta Llama 3',
+            desc: 'Largest open source model with SOTA capabilities.',
+            context: '8k',
+            tags: ['Open Source', 'Fast'],
+            icon: <MessageSquare size={24} />,
+            tier: 'Free Tier'
         }
     ];
 

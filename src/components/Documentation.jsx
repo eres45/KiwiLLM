@@ -278,39 +278,54 @@ Authorization: Bearer kiwi-your-api-key-here`;
                         <h2>Available Models</h2>
                         <div className="models-grid-docs">
                             <div className="model-card-docs">
-                                <h4>gpt-5</h4>
-                                <p>Next-gen foundation model</p>
-                                <span className="model-tag">Future</span>
-                            </div>
-                            <div className="model-card-docs">
-                                <h4>gemini-2.5-pro</h4>
-                                <p>Google's latest SOTA model</p>
-                                <span className="model-tag">New</span>
-                            </div>
-                            <div className="model-card-docs">
-                                <h4>o3</h4>
-                                <p>Advanced reasoning model</p>
-                                <span className="model-tag">Reasoning</span>
+                                <h4>gpt-4</h4>
+                                <p>OpenAI GPT-4 via Stable Proxy</p>
+                                <span className="model-tag">Stable</span>
                             </div>
                             <div className="model-card-docs">
                                 <h4>deepseek-v3</h4>
-                                <p>Latest DeepSeek model</p>
-                                <span className="model-tag">Recommended</span>
+                                <p>DeepSeek-v3.2 Direct API</p>
+                                <span className="model-tag">New</span>
                             </div>
                             <div className="model-card-docs">
-                                <h4>qwen3-coder-plus</h4>
-                                <p>Flagship Qwen 3 coding model</p>
+                                <h4>gpt-oss-120b</h4>
+                                <p>High-performance Open Source (120B)</p>
                                 <span className="model-tag">SOTA</span>
                             </div>
                             <div className="model-card-docs">
-                                <h4>gemma-2-27b</h4>
-                                <p>Powerful Google Gemma model</p>
+                                <h4>kimi-k2-instruct</h4>
+                                <p>MoonshotAI Kimi-K2-Instruct</p>
+                                <span className="model-tag">New</span>
+                            </div>
+                            <div className="model-card-docs">
+                                <h4>mistral-small</h4>
+                                <p>Mistral-Small-24B Instruct</p>
+                                <span className="model-tag">Stable</span>
+                            </div>
+                            <div className="model-card-docs">
+                                <h4>qwen3-next</h4>
+                                <p>Qwen 2.5 72B Instruct</p>
+                                <span className="model-tag">New</span>
+                            </div>
+                            <div className="model-card-docs">
+                                <h4>copilot-chat</h4>
+                                <p>Microsoft Copilot Chat</p>
+                                <span className="model-tag">Assistant</span>
+                            </div>
+                            <div className="model-card-docs">
+                                <h4>copilot-think</h4>
+                                <p>Microsoft Copilot Think</p>
                                 <span className="model-tag">Reasoning</span>
                             </div>
                             <div className="model-card-docs">
-                                <h4>dark-code-76</h4>
-                                <p>Powerful 12B coding model</p>
-                                <span className="model-tag">Coding</span>
+                                <h4>gemini-pro</h4>
+                                <p>Gemini 2.5 Pro</p>
+                                <span className="model-tag">Fast</span>
+                            </div>
+                            <div className="model-card-docs">
+                                <h4>llama-3-meta</h4>
+                                <p>Llama 3.1 405B</p>
+                                <span className="model-tag">Open Source</span>
                             </div>
                         </div>
 

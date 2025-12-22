@@ -104,96 +104,142 @@ const validateKey = async (req, res, next) => {
 
 // --- Custom Model Logic ---
 const CUSTOM_MODELS = {
-    'gpt-oss-120b': { url: 'https://sii3.top/api/gpt-oss.php', param: 'text' },
-    'grok-4': { url: 'https://sii3.top/api/grok4.php', param: 'text' },
-    'qwen-coder-plus': { url: 'https://sii3.top/api/qwen.php', param: 'prompt', extra: { model: 'qwen-coder-plus' } },
-    'qwen2.5-72b-chat': { url: 'https://sii3.top/api/qwen.php', param: 'prompt', extra: { model: 'qwen2.5-72b-chat' } },
-    'deepseek-v3': { url: 'https://sii3.top/api/deepseek.php', param: 'v3' },
-    'deepseek-r1': { url: 'https://sii3.top/api/deepseek.php', param: 'r1' },
-    'dark-code-76': { url: 'https://sii3.top/api/DarkCode.php', param: 'text' },
-    // Qwen 3 Series
-    'qwen3-coder-plus': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-coder-plus' },
-    'qwen3-coder-480b-a35b-instruct': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-coder-480b-a35b-instruct' },
-    'qwen3-72b-chat': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-72b-chat' },
-    'qwen3-72b-coder': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-72b-coder' },
-    'qwen3-72b-math': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-72b-math' },
-    'qwen3-72b-vl': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-72b-vl' },
-    'qwen3-32b-chat': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-32b-chat' },
-    'qwen3-32b-vl': { url: 'https://sii3.top/api/qwen.php', param: 'qwen3-32b-vl' },
-    // Qwen 2.5 Series
-    'qwen2.5-72b-instruct': { url: 'https://sii3.top/api/qwen.php', param: 'qwen2.5-72b-instruct' },
-    'qwen2.5-72b-instruct': { url: 'https://sii3.top/api/qwen.php', param: 'qwen2.5-72b-instruct' },
-    'qwen2.5-72b-coder-instruct': { url: 'https://sii3.top/api/qwen.php', param: 'qwen2.5-72b-coder-instruct' },
-    // OpenAI Series
-    'gpt-4': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4' },
-    'gpt-4-turbo': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4-turbo' },
-    'gpt-4o': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4o' },
-    'gpt-4o-mini': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4o-mini' },
-    'gpt-4.1': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4.1' },
-    'gpt-4.1-mini': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4.1-mini' },
-    'gpt-4.1-nano': { url: 'https://sii3.top/api/openai.php', param: 'gpt-4.1-nano' },
-    'o1': { url: 'https://sii3.top/api/openai.php', param: 'o1' },
-    'o3': { url: 'https://sii3.top/api/openai.php', param: 'o3' },
-    'o3-mini': { url: 'https://sii3.top/api/openai.php', param: 'o3-mini' },
-    'o4-mini': { url: 'https://sii3.top/api/openai.php', param: 'o4-mini' },
-    'gpt-5': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5' },
-    'gpt-5-mini': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5-mini' },
-    'gpt-5-nano': { url: 'https://sii3.top/api/openai.php', param: 'gpt-5-nano' },
-    // Gemini Series
-    'gemini-2.5-pro': { url: 'https://sii3.top/api/gemini-dark.php', param: 'gemini-pro' },
-    'gemini-2.5-deep-search': { url: 'https://sii3.top/api/gemini-dark.php', param: 'gemini-deep' },
-    'gemini-2.5-flash': { url: 'https://sii3.top/DARK/gemini.php', param: 'text' },
-    // Gemma Series
-    'gemma-2-4b': { url: 'https://sii3.top/api/gemma.php', param: '4b' },
-    'gemma-2-12b': { url: 'https://sii3.top/api/gemma.php', param: '12b' },
-    'gemma-2-27b': { url: 'https://sii3.top/api/gemma.php', param: '27b' }
+    'gpt-4': {
+        url: 'https://gpt-3-5.apis-bj-devs.workers.dev',
+        param: 'prompt',
+        method: 'GET',
+        responseField: 'reply'
+    },
+    'deepseek-v3': {
+        url: 'https://sii3.top/api/deepseek/api.php',
+        param: 'v3',
+        staticBodyParams: {
+            key: process.env.DEEPSEEK_KEY
+        }
+    },
+    'deepseek-r1': {
+        url: 'https://sii3.top/api/deepseek/api.php',
+        param: 'r1',
+        staticBodyParams: {
+            key: process.env.DEEPSEEK_KEY
+        }
+    },
+    'gpt-oss-120b': {
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        contentType: 'application/json',
+        headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+        },
+        useFullMessages: true,
+        param: 'messages',
+        staticBodyParams: {
+            model: 'openai/gpt-oss-120b'
+        }
+    },
+    'gpt-oss-20b': {
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        contentType: 'application/json',
+        headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+        },
+        useFullMessages: true,
+        param: 'messages',
+        staticBodyParams: {
+            model: 'openai/gpt-oss-20b'
+        }
+    },
+    'kimi-k2-instruct': {
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        contentType: 'application/json',
+        headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+        },
+        useFullMessages: true,
+        param: 'messages',
+        staticBodyParams: {
+            model: 'moonshotai/kimi-k2-instruct'
+        }
+    },
+    'mistral-small': {
+        url: 'https://api.typegpt.net/v1/chat/completions',
+        contentType: 'application/json',
+        headers: {
+            'Authorization': `Bearer ${process.env.TYPEGPT_API_KEY}`
+        },
+        useFullMessages: true,
+        param: 'messages',
+        staticBodyParams: {
+            model: 'mistralai/mistral-small-24b-instruct'
+        }
+    },
+    'qwen3-next': {
+        url: 'https://api.typegpt.net/v1/chat/completions',
+        contentType: 'application/json',
+        headers: {
+            'Authorization': `Bearer ${process.env.TYPEGPT_API_KEY}`
+        },
+        useFullMessages: true,
+        param: 'messages',
+        staticBodyParams: {
+            model: 'qwen/qwen3-next-80b-a3b-instruct'
+        }
+    },
+    'deepseek-v3.1': {
+        url: 'https://api.typegpt.net/v1/chat/completions',
+        contentType: 'application/json',
+        headers: {
+            'Authorization': `Bearer ${process.env.TYPEGPT_API_KEY}`
+        },
+        useFullMessages: true,
+        param: 'messages',
+        staticBodyParams: {
+            model: 'deepseek-ai/deepseek-v3.1'
+        }
+    },
+    'copilot-chat': {
+        url: 'https://vetrex.x10.mx/api/copilot_chat.php',
+        contentType: 'application/json',
+        param: 'text',
+        responseField: 'reply'
+    },
+    'copilot-think': {
+        url: 'https://vetrex.x10.mx/api/copilot_think.php',
+        contentType: 'application/json',
+        param: 'text',
+        responseField: 'reply'
+    },
+    'gemini-pro': {
+        url: 'https://vetrex.x10.mx/api/gemini.php',
+        contentType: 'application/json',
+        param: 'text',
+        responseField: 'reply'
+    },
+    'llama-3-meta': {
+        url: 'https://vetrex.x10.mx/api/meta_ai.php',
+        contentType: 'application/json',
+        param: 'prompt',
+        responseField: 'response'
+    },
+    // Models will be added here from reliable providers (OpenRouter, DeepSeek direct, etc.)
 };
 
 // --- Models Endpoint ---
 app.get('/v1/models', (req, res) => {
     const models = [
-        // Custom Models Only (OpenAI models removed as they require API key)
+        { id: 'gpt-4', object: 'model', created: Date.now(), owned_by: 'openai' },
         { id: 'deepseek-v3', object: 'model', created: Date.now(), owned_by: 'deepseek' },
         { id: 'deepseek-r1', object: 'model', created: Date.now(), owned_by: 'deepseek' },
-        { id: 'dark-code-76', object: 'model', created: Date.now(), owned_by: 'darkai' },
-        { id: 'grok-4', object: 'model', created: Date.now(), owned_by: 'xai' },
-        { id: 'qwen2.5-72b-chat', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen-coder-plus', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        // New Qwen Models
-        { id: 'qwen3-coder-plus', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen3-coder-480b-a35b-instruct', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen3-72b-chat', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen3-72b-coder', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen3-72b-math', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen3-72b-vl', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen3-32b-chat', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen3-32b-vl', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen2.5-72b-instruct', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        { id: 'qwen2.5-72b-coder-instruct', object: 'model', created: Date.now(), owned_by: 'qwen' },
-        // OpenAI Models
-        { id: 'gpt-4', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-4-turbo', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-4o', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-4o-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-4.1', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-4.1-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-4.1-nano', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'o1', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'o3', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'o3-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'o4-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-5', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-5-mini', object: 'model', created: Date.now(), owned_by: 'openai' },
-        { id: 'gpt-5-nano', object: 'model', created: Date.now(), owned_by: 'openai' },
-        // Gemini Models
-        { id: 'gemini-2.5-pro', object: 'model', created: Date.now(), owned_by: 'google' },
-        { id: 'gemini-2.5-deep-search', object: 'model', created: Date.now(), owned_by: 'google' },
-        { id: 'gemini-2.5-flash', object: 'model', created: Date.now(), owned_by: 'google' },
-        // Gemma Models
-        { id: 'gemma-2-4b', object: 'model', created: Date.now(), owned_by: 'google' },
-        { id: 'gemma-2-12b', object: 'model', created: Date.now(), owned_by: 'google' },
-        { id: 'gemma-2-27b', object: 'model', created: Date.now(), owned_by: 'google' },
-        { id: 'gpt-oss-120b', object: 'model', created: Date.now(), owned_by: 'gpt-oss' }
+        { id: 'gpt-oss-120b', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'gpt-oss-20b', object: 'model', created: Date.now(), owned_by: 'openai' },
+        { id: 'kimi-k2-instruct', object: 'model', created: Date.now(), owned_by: 'moonshotai' },
+        { id: 'mistral-small', object: 'model', created: Date.now(), owned_by: 'mistral' },
+        { id: 'qwen3-next', object: 'model', created: Date.now(), owned_by: 'qwen' },
+        { id: 'deepseek-v3.1', object: 'model', created: Date.now(), owned_by: 'deepseek' },
+        { id: 'copilot-chat', object: 'model', created: Date.now(), owned_by: 'microsoft' },
+        { id: 'copilot-think', object: 'model', created: Date.now(), owned_by: 'microsoft' },
+        { id: 'gemini-pro', object: 'model', created: Date.now(), owned_by: 'google' },
+        { id: 'llama-3-meta', object: 'model', created: Date.now(), owned_by: 'meta' },
+        // Models will be added here
     ];
     res.json({ object: 'list', data: models });
 });
@@ -333,42 +379,79 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
             const lastUserMessage = messages.filter(m => m.role === 'user').pop();
             const prompt = lastUserMessage ? lastUserMessage.content : messages.map(m => m.content).join('\n');
 
-            // Build form data for POST request
-            const formData = new URLSearchParams();
-            formData.append(config.param, prompt);
+            // Handle different HTTP methods (POST default, GET optional)
+            let response;
+            if (config.method === 'GET') {
+                const url = new URL(config.url);
+                url.searchParams.append(config.param, prompt);
+                if (config.extra) {
+                    Object.entries(config.extra).forEach(([k, v]) => url.searchParams.append(k, v));
+                }
+                response = await fetch(url.toString());
+            } else {
+                // Determine body format
+                let body;
+                const headers = { ...config.headers };
 
-            // Add extra parameters if needed
-            if (config.extra) {
-                Object.entries(config.extra).forEach(([k, v]) => formData.append(k, v));
+                if (config.contentType === 'application/json') {
+                    headers['Content-Type'] = 'application/json';
+                    const payload = {
+                        [config.param]: config.useFullMessages ? messages : prompt,
+                        ...config.staticBodyParams,
+                        ...config.extra
+                    };
+                    body = JSON.stringify(payload);
+                } else {
+                    // Default to URLSearchParams (form data)
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                    const formData = new URLSearchParams();
+                    formData.append(config.param, prompt);
+
+                    // Add static body parameters (like API keys)
+                    if (config.staticBodyParams) {
+                        Object.entries(config.staticBodyParams).forEach(([k, v]) => formData.append(k, v));
+                    }
+
+                    // Add extra parameters if needed
+                    if (config.extra) {
+                        Object.entries(config.extra).forEach(([k, v]) => formData.append(k, v));
+                    }
+                    body = formData.toString();
+                }
+
+                response = await fetch(config.url, {
+                    method: 'POST',
+                    headers: headers,
+                    body: body
+                });
             }
-
-            // Use POST instead of GET to avoid URL length limits (414 errors)
-            const response = await fetch(config.url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: formData.toString()
-            });
 
             const text = await response.text();
 
-            // Try to parse JSON response and extract the 'response' field
+            // Try to parse JSON response and extract the content field
             let content = text;
             try {
                 const jsonData = JSON.parse(text);
-                if (jsonData.response) {
-                    content = jsonData.response;
-                } else if (jsonData.error) {
-                    // If API returns an error
-                    throw new Error(`Upstream API error: ${jsonData.error}`);
+
+                // Handle OpenAI format (choices[0].message.content) vs custom field
+                if (jsonData.choices && jsonData.choices[0] && jsonData.choices[0].message) {
+                    content = jsonData.choices[0].message.content;
+                } else {
+                    // Use custom response field if defined, else fallback to 'response'
+                    const field = config.responseField || 'response';
+                    if (jsonData[field]) {
+                        content = jsonData[field];
+                    } else if (jsonData.error) {
+                        // If API returns an error
+                        throw new Error(`Upstream API error: ${jsonData.error.message || jsonData.error}`);
+                    }
                 }
             } catch (e) {
-                // If not JSON, check if it's HTML (error page)
+                // If parsing fails or field missing, check if it's HTML (error page)
                 if (text.trim().startsWith('<') || text.trim().startsWith('<!')) {
                     throw new Error('Upstream API returned an error page. The model might be unavailable.');
                 }
-                // Use the raw text
+                // Use the raw text only if not an error or if explicitly non-json
                 content = text;
             }
 
