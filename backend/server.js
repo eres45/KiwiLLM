@@ -3,6 +3,7 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 const OpenAI = require('openai');
 const path = require('path');
+const crypto = require('crypto');
 
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
@@ -44,16 +45,62 @@ const openai = process.env.OPENAI_MASTER_KEY
     : null;
 
 // --- OkRouter Setup (OpenAI-compatible, Optional) ---
-const okrouterBaseUrl = process.env.OKROUTER_BASE_URL || 'https://api.okrouter.com';
-const okrouter = process.env.OKROUTER_API_KEY
-    ? new OpenAI({
-        apiKey: process.env.OKROUTER_API_KEY,
-        baseURL: `${okrouterBaseUrl.replace(/\/$/, '')}/v1`,
-        defaultHeaders: {
-            'x-foo': 'true'
-        }
-    })
-    : null;
+const normalizeOkrouterBaseUrl = (raw) => {
+    const value = (raw || '').trim() || 'https://api.okrouter.com';
+    // Accept either https://api.okrouter.com or https://api.okrouter.com/v1/ and normalize to origin only.
+    return value
+        .replace(/\/+$/, '')
+        .replace(/\/v1$/i, '');
+};
+
+const okrouterBaseUrl = normalizeOkrouterBaseUrl(process.env.OKROUTER_BASE_URL);
+const parseOkrouterKeys = () => {
+    const pooled = (process.env.OKROUTER_API_KEYS || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+    if (pooled.length > 0) return pooled;
+    if (process.env.OKROUTER_API_KEY && process.env.OKROUTER_API_KEY.trim()) return [process.env.OKROUTER_API_KEY.trim()];
+    return [];
+};
+
+const createOkrouterClient = (apiKey) => new OpenAI({
+    apiKey,
+    baseURL: `${okrouterBaseUrl.replace(/\/$/, '')}/v1`,
+    defaultHeaders: {
+        'x-foo': 'true'
+    }
+});
+
+const okrouterKeys = parseOkrouterKeys();
+if (okrouterKeys.length > 0) {
+    console.log(`OkRouter enabled with base URL: ${okrouterBaseUrl} (keys: ${okrouterKeys.length})`);
+}
+
+const okrouterClients = okrouterKeys.map(createOkrouterClient);
+
+const stableKeyIndexForUser = (userId, count) => {
+    if (!count) return 0;
+    const input = typeof userId === 'string' && userId.trim() ? userId.trim() : 'anonymous';
+    const hash = crypto.createHash('sha256').update(input).digest();
+    // Use first 4 bytes as unsigned int
+    const n = hash.readUInt32BE(0);
+    return n % count;
+};
+
+const shouldFailoverOkrouterError = (err) => {
+    const status = err?.status;
+    if (status === 401 || status === 403 || status === 429) return true;
+    // Some providers use 402 for insufficient credits
+    if (status === 402) return true;
+    if (typeof status === 'number' && status >= 500) return true;
+
+    const msg = String(err?.message || '').toLowerCase();
+    if (msg.includes('insufficient') && msg.includes('credit')) return true;
+    if (msg.includes('rate limit')) return true;
+    return false;
+};
 
 // --- In-Memory Rate Limiting ---
 const rateLimits = new Map();
@@ -237,12 +284,11 @@ const CUSTOM_MODELS = {
     },
     // Models will be added here from reliable providers (OpenRouter, DeepSeek direct, etc.)
 };
-
 // --- Models Endpoint ---
 app.get('/v1/models', async (req, res) => {
-    if (process.env.OKROUTER_API_KEY) {
+    if (okrouterClients.length > 0) {
         const baseUrls = [
-            (process.env.OKROUTER_BASE_URL || 'https://api.okrouter.com').replace(/\/$/, ''),
+            normalizeOkrouterBaseUrl(process.env.OKROUTER_BASE_URL),
             'https://cn.okrouter.com'
         ];
 
@@ -253,26 +299,29 @@ app.get('/v1/models', async (req, res) => {
 
             try {
                 const upstream = `${baseUrl}/v1/models`;
-                const upstreamRes = await fetch(upstream, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${process.env.OKROUTER_API_KEY}`,
-                        'x-foo': 'true'
+                // Try keys until one succeeds (some keys may be exhausted/revoked)
+                for (let i = 0; i < okrouterKeys.length; i++) {
+                    const upstreamRes = await fetch(upstream, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${okrouterKeys[i]}`,
+                            'x-foo': 'true'
+                        }
+                    });
+
+                    const text = await upstreamRes.text();
+                    if (!upstreamRes.ok) {
+                        console.error(`OkRouter models list error (${upstreamRes.status}) from ${baseUrl} (key_index=${i}):`, text);
+                        continue;
                     }
-                });
 
-                const text = await upstreamRes.text();
-                if (!upstreamRes.ok) {
-                    console.error(`OkRouter models list error (${upstreamRes.status}) from ${baseUrl}:`, text);
-                    continue;
-                }
-
-                try {
-                    const json = JSON.parse(text);
-                    return res.json(json);
-                } catch (err) {
-                    console.error(`OkRouter models list parse error from ${baseUrl}:`, err);
-                    continue;
+                    try {
+                        const json = JSON.parse(text);
+                        return res.json(json);
+                    } catch (err) {
+                        console.error(`OkRouter models list parse error from ${baseUrl} (key_index=${i}):`, err);
+                        continue;
+                    }
                 }
             } catch (err) {
                 console.error(`OkRouter models list request failed for ${baseUrl}:`, err);
@@ -548,18 +597,38 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
         }
 
         // Fallback to OkRouter (recommended)
-        if (okrouter) {
-            const completion = await okrouter.chat.completions.create({
-                messages: messages,
-                model: model || 'gpt-4o-mini',
-                max_tokens: typeof req.body.max_tokens === 'number' ? req.body.max_tokens : 1000
-            });
+        if (okrouterClients.length > 0) {
+            const requestedModel = model || 'gpt-4o-mini';
+            const maxTokens = typeof req.body.max_tokens === 'number' ? req.body.max_tokens : 1000;
 
-            const promptText = Array.isArray(messages) ? messages.map(m => m?.content).filter(Boolean).join('\n') : '';
-            const content = completion?.choices?.[0]?.message?.content || '';
-            await trackUsage(req.user.userId, model, estimateTokens(promptText), estimateTokens(content), true);
+            const startIndex = stableKeyIndexForUser(req.user?.userId, okrouterClients.length);
+            let lastErr;
 
-            return res.json(completion);
+            for (let attempt = 0; attempt < okrouterClients.length; attempt++) {
+                const keyIndex = (startIndex + attempt) % okrouterClients.length;
+                try {
+                    const completion = await okrouterClients[keyIndex].chat.completions.create({
+                        messages: messages,
+                        model: requestedModel,
+                        max_tokens: maxTokens
+                    });
+
+                    const promptText = Array.isArray(messages) ? messages.map(m => m?.content).filter(Boolean).join('\n') : '';
+                    const content = completion?.choices?.[0]?.message?.content || '';
+                    await trackUsage(req.user.userId, requestedModel, estimateTokens(promptText), estimateTokens(content), true);
+
+                    return res.json(completion);
+                } catch (err) {
+                    lastErr = err;
+                    console.error(`OkRouter chat error (key_index=${keyIndex}):`, err?.status || err?.message || err);
+
+                    if (!shouldFailoverOkrouterError(err)) {
+                        throw err;
+                    }
+                }
+            }
+
+            throw lastErr || new Error('All OkRouter keys failed');
         }
 
         // Fallback to OpenAI (requires OPENAI_MASTER_KEY)
@@ -587,7 +656,7 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
 
         return res.status(400).json({
             error: 'Model not supported by this gateway',
-            details: 'This model is not in CUSTOM_MODELS and neither OKROUTER_API_KEY nor OPENAI_MASTER_KEY is configured on the server.'
+            details: 'This model is not in CUSTOM_MODELS and neither OKROUTER_API_KEYS/OKROUTER_API_KEY nor OPENAI_MASTER_KEY is configured on the server.'
         });
 
     } catch (error) {
