@@ -2,7 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const OpenAI = require('openai');
-require('dotenv').config();
+const path = require('path');
+
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const app = express();
 app.use(cors());
@@ -38,6 +41,18 @@ console.log('Firebase Admin SDK initialized');
 // --- OpenAI Setup (Optional) ---
 const openai = process.env.OPENAI_MASTER_KEY
     ? new OpenAI({ apiKey: process.env.OPENAI_MASTER_KEY })
+    : null;
+
+// --- OkRouter Setup (OpenAI-compatible, Optional) ---
+const okrouterBaseUrl = process.env.OKROUTER_BASE_URL || 'https://api.okrouter.com';
+const okrouter = process.env.OKROUTER_API_KEY
+    ? new OpenAI({
+        apiKey: process.env.OKROUTER_API_KEY,
+        baseURL: `${okrouterBaseUrl.replace(/\/$/, '')}/v1`,
+        defaultHeaders: {
+            'x-foo': 'true'
+        }
+    })
     : null;
 
 // --- In-Memory Rate Limiting ---
@@ -224,7 +239,53 @@ const CUSTOM_MODELS = {
 };
 
 // --- Models Endpoint ---
-app.get('/v1/models', (req, res) => {
+app.get('/v1/models', async (req, res) => {
+    if (process.env.OKROUTER_API_KEY) {
+        const baseUrls = [
+            (process.env.OKROUTER_BASE_URL || 'https://api.okrouter.com').replace(/\/$/, ''),
+            'https://cn.okrouter.com'
+        ];
+
+        const seen = new Set();
+        for (const baseUrl of baseUrls) {
+            if (seen.has(baseUrl)) continue;
+            seen.add(baseUrl);
+
+            try {
+                const upstream = `${baseUrl}/v1/models`;
+                const upstreamRes = await fetch(upstream, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${process.env.OKROUTER_API_KEY}`,
+                        'x-foo': 'true'
+                    }
+                });
+
+                const text = await upstreamRes.text();
+                if (!upstreamRes.ok) {
+                    console.error(`OkRouter models list error (${upstreamRes.status}) from ${baseUrl}:`, text);
+                    continue;
+                }
+
+                try {
+                    const json = JSON.parse(text);
+                    return res.json(json);
+                } catch (err) {
+                    console.error(`OkRouter models list parse error from ${baseUrl}:`, err);
+                    continue;
+                }
+            } catch (err) {
+                console.error(`OkRouter models list request failed for ${baseUrl}:`, err);
+            }
+        }
+
+        // If OkRouter is configured but upstream fails, return a helpful error
+        return res.status(502).json({
+            error: 'Upstream Provider Error',
+            details: 'Failed to fetch model list from OkRouter (tried api.okrouter.com and cn.okrouter.com).'
+        });
+    }
+
     const models = [
         { id: 'gpt-4', object: 'model', created: Date.now(), owned_by: 'openai' },
         { id: 'deepseek-v3', object: 'model', created: Date.now(), owned_by: 'deepseek' },
@@ -486,25 +547,48 @@ app.post('/v1/chat/completions', validateKey, async (req, res) => {
             });
         }
 
-        // Fallback to OpenAI (won't work without valid API key)
-        const completion = await openai.chat.completions.create({
-            messages: messages,
-            model: model || 'gpt-3.5-turbo',
-            stream: true,
-        });
+        // Fallback to OkRouter (recommended)
+        if (okrouter) {
+            const completion = await okrouter.chat.completions.create({
+                messages: messages,
+                model: model || 'gpt-4o-mini',
+                max_tokens: typeof req.body.max_tokens === 'number' ? req.body.max_tokens : 1000
+            });
 
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
+            const promptText = Array.isArray(messages) ? messages.map(m => m?.content).filter(Boolean).join('\n') : '';
+            const content = completion?.choices?.[0]?.message?.content || '';
+            await trackUsage(req.user.userId, model, estimateTokens(promptText), estimateTokens(content), true);
 
-        for await (const chunk of completion) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            if (content) {
-                res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
-            }
+            return res.json(completion);
         }
-        res.write('data: [DONE]\n\n');
-        res.end();
+
+        // Fallback to OpenAI (requires OPENAI_MASTER_KEY)
+        if (openai) {
+            const completion = await openai.chat.completions.create({
+                messages: messages,
+                model: model || 'gpt-3.5-turbo',
+                stream: true,
+            });
+
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+
+            for await (const chunk of completion) {
+                const content = chunk.choices[0]?.delta?.content || '';
+                if (content) {
+                    res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
+                }
+            }
+            res.write('data: [DONE]\n\n');
+            res.end();
+            return;
+        }
+
+        return res.status(400).json({
+            error: 'Model not supported by this gateway',
+            details: 'This model is not in CUSTOM_MODELS and neither OKROUTER_API_KEY nor OPENAI_MASTER_KEY is configured on the server.'
+        });
 
     } catch (error) {
         console.error('Proxy Error:', error);
